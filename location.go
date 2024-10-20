@@ -29,7 +29,11 @@ type IndustryTile struct {
 }
 
 type IndustrySpace struct {
-	Types     []IndustryType
+	Types              []IndustryType
+	CanalEraNeighbours []IndustrySpace
+	RailEraNeighbours  []IndustrySpace
+	// TODO: MerchantNeighbours
+
 	Tile      IndustryTile
 	Resources int
 }
