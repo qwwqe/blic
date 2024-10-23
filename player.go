@@ -11,8 +11,11 @@ type PlayerMat struct {
 }
 
 type Player struct {
+	Id int
+
 	Mat           PlayerMat
 	Money         int
+	SpentMoney    int
 	IncomeSpace   int
 	VictoryPoints int
 	Links         int
