@@ -1,5 +1,9 @@
 package main
 
-import (
-	"fmt"
-)
+type Card struct {
+	IndustryTypes []IndustryType
+	LocationName  string
+
+	IsWildLocation bool
+	IsWildIndustry bool
+}

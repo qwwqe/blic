@@ -6,6 +6,3 @@ const (
 	EraCanal Era = "canal"
 	EraRail  Era = "rail"
 )
-
-type Card struct {
-}

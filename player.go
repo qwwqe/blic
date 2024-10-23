@@ -16,5 +16,8 @@ type Player struct {
 	IncomeSpace   int
 	VictoryPoints int
 	Links         int
+
 	Cards         []Card
+	Discards      []Card
+	HiddenDiscard *Card
 }
