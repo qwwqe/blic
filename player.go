@@ -11,7 +11,7 @@ type PlayerMat struct {
 }
 
 type Player struct {
-	Id int
+	Id string
 
 	Mat           PlayerMat
 	Money         int
