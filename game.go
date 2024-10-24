@@ -7,9 +7,11 @@ const (
 	EraRail  Era = "rail"
 )
 
-type RoundPhase string
+type GamePhase string
 
-type TurnPhase string
+const (
+	GamePhaseAction GamePhase = "action"
+)
 
 type Game struct {
 	Id string
@@ -26,7 +28,7 @@ type Game struct {
 	WildLocationCards []Card
 	WildIndustryCards []Card
 
-	CurrentPlayerIndex int
-	CurrentRoundPhase  RoundPhase
-	CurrentTurnPhase   TurnPhase
+	PlayerIndex int
+	Round       int
+	Phase       GamePhase
 }
