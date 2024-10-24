@@ -14,7 +14,8 @@ const (
 )
 
 type Game struct {
-	Id string
+	Id     string
+	Events []Event
 
 	Players   []Player
 	Locations []Location
