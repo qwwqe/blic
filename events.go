@@ -10,6 +10,7 @@ const (
 type Event interface{}
 
 type GameCreatedEvent struct {
+	Id        string
 	Deck      []Card
 	Locations []Location
 	Players   []Player

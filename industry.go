@@ -30,3 +30,12 @@ type IndustryTile struct {
 	CostInCoal   int
 	CostInIron   int
 }
+
+func (tile IndustryTile) Clone() IndustryTile {
+	if tile.RequiredEra != nil {
+		era := *tile.RequiredEra
+		tile.RequiredEra = &era
+	}
+
+	return tile
+}

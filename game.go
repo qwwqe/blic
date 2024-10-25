@@ -33,3 +33,12 @@ type Game struct {
 	Round       int
 	Phase       GamePhase
 }
+
+func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) {
+	g.Id = e.Id
+	g.Events = []Event{}
+
+	g.Players = CloneSlice(g.Players)
+	g.Deck = CloneSlice(e.Deck)
+	// Locations
+}
