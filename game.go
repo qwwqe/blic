@@ -1,5 +1,7 @@
 package main
 
+import "github.com/google/uuid"
+
 type Era string
 
 const (
@@ -38,9 +40,23 @@ type Game struct {
 	Phase       GamePhase
 }
 
+func CreateGame(deck []Card, locations []Location, players []Player) Game {
+	// TODO: Validate deck, locations, and players
+
+	game := Game{}
+	game.HandleGameCreatedEvent(GameCreatedEvent{
+		uuid.NewString(),
+		deck,
+		locations,
+		players,
+	})
+
+	return game
+}
+
 func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) {
 	g.Id = e.Id
-	g.Events = []Event{}
+	g.Events = []Event{e}
 
 	g.Players = CloneSlice(g.Players)
 	g.Locations = CloneSlice(e.Locations)
