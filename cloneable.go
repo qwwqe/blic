@@ -11,3 +11,12 @@ func CloneSlice[T Cloneable[T]](slice []T) []T {
 	}
 	return newSlice
 }
+
+func ClonePointerSlice[T Cloneable[T]](slice []*T) []*T {
+	newSlice := make([]*T, 0, len(slice))
+	for _, item := range slice {
+		newItem := (*item).Clone()
+		newSlice = append(newSlice, &newItem)
+	}
+	return newSlice
+}

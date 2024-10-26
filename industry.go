@@ -2,6 +2,10 @@ package main
 
 type IndustryType string
 
+func (t IndustryType) Clone() IndustryType {
+	return t
+}
+
 const (
 	IndustryTypeCoalMine     IndustryType = "coalmine"
 	IndustryTypeIronWorks    IndustryType = "ironworks"
