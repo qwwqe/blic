@@ -50,11 +50,28 @@ type Merchant struct {
 	Links     int
 	BeerBonus MerchantBeerBonus
 	Spaces    []*MerchantSpace
+
+	MinPlayers int
 }
 
 func (m Merchant) Clone() Merchant {
 	m.Spaces = ClonePointerSlice(m.Spaces)
 	return m
+}
+
+func NewMerchant(
+	links int, numSpaces int, minPlayers int,
+	beerBonusType MerchantBeerBonusType, beerBonusAmount int,
+) *Merchant {
+	return &Merchant{
+		Links: links,
+		BeerBonus: MerchantBeerBonus{
+			Type:   beerBonusType,
+			Amount: beerBonusAmount,
+		},
+		Spaces:     make([]*MerchantSpace, numSpaces),
+		MinPlayers: minPlayers,
+	}
 }
 
 type Location struct {
