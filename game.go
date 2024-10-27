@@ -1,6 +1,11 @@
 package main
 
-import "github.com/google/uuid"
+import (
+	"errors"
+	"fmt"
+
+	"github.com/google/uuid"
+)
 
 type Era string
 
@@ -40,10 +45,17 @@ type Game struct {
 	Phase       GamePhase
 }
 
-func CreateGame(deck []Card, locations []Location, players []Player) Game {
-	// TODO: Validate deck, locations, and players
+var (
+	ErrInvalidPlayerCount = errors.New("Invalid player count")
+)
 
+func CreateGame(deck []Card, locations []Location, playerCount int) (Game, error) {
 	game := Game{}
+
+	if playerCount < 2 || playerCount > 4 {
+		return game, fmt.Errorf("%w: %d", ErrInvalidPlayerCount, playerCount)
+	}
+
 	game.HandleGameCreatedEvent(GameCreatedEvent{
 		uuid.NewString(),
 		deck,
@@ -51,7 +63,7 @@ func CreateGame(deck []Card, locations []Location, players []Player) Game {
 		players,
 	})
 
-	return game
+	return game, nil
 }
 
 func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) {
