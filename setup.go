@@ -201,4 +201,53 @@ func standardGameLocations() []Location {
 		},
 	}
 }
+
+var standardGameDualLinks = [][]string{
+	{"warrington", "stokeontrent"},
+	{"stokeontrent", "leek"},
+	{"stokeontrent", "stone"},
+	{"nottingham", "derby"},
+	{"derby", "belper"},
+	{"stafford", "stone"},
+	{"stafford", "cannock"},
+	{"cannock", "walsall"},
+	{"cannock", "farmbrewery1"},
+	{"burtonupontrent", "derby"},
+	{"burtonupontrent", "tamworth"},
+	{"burtonupontrent", "stone"},
+	{"shrewsbury", "coalbrookdale"},
+	{"coalbrookdale", "wolverhampton"},
+	{"coalbrookdale", "kidderminster"},
+	{"wolverhampton", "dudley"},
+	{"dudley", "kidderminster"},
+	{"kidderminster", "worcester"},
+	{"kidderminster", "farmbrewery2"}, // TODO: support "three-way edges"
+	{"worcester", "farmbrewery2"},     // TODO: support "three-way edges"
+	{"gloucester", "worcester"},
+	{"gloucester", "redditch"},
+	{"redditch", "oxford"},
+	{"oxford", "birmingham"},
+	{"birmingham", "worcester"},
+	{"birmingham", "dudley"},
+	{"birmingham", "walsall"},
+	{"birmingham", "tamworth"},
+	{"birmingham", "coventry"},
+	{"nuneaton", "tamworth"},
+}
+
+var standardGameCanalLinks = [][]string{
+	{"walsall", "burtonupontrent"},
+}
+
+var standardGameRailLinks = [][]string{
+	{"leek", "belper"},
+	{"stone", "uttoxeter"},
+	{"uttoxeter", "derby"},
+	{"cannock", "burtonupontrent"},
+	{"walsall", "tamworth"},
+	{"nuneaton", "birmingham"},
+	{"nuneaton", "coventry"},
+	{"birmingham", "redditch"},
+}
+
 }
