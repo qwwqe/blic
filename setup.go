@@ -255,6 +255,7 @@ var (
 	ErrInvalidLink           = errors.New("Invalid link")
 	ErrNonExistentLocation   = errors.New("Nonexistent location")
 	ErrDuplicateLink         = errors.New("Duplicate link")
+	ErrOrphanLocation        = errors.New("Location has no neighbours")
 )
 
 func addLink(link []string,
@@ -343,6 +344,13 @@ func buildStandardLocations() ([]Location, error) {
 		return nil, err
 	}
 
+	for _, location := range locations {
+		if len(location.CanalEraNeighbours) == 0 &&
+			len(location.RailEraNeighbours) == 0 {
+			return nil, ErrOrphanLocation
+		}
+	}
+
 	return locations, nil
 }
 
@@ -351,8 +359,6 @@ func mustBuildStandardLocations() []Location {
 	if err != nil {
 		panic("setup: " + err.Error())
 	}
-
-	// check for orphaned locations
 
 	return locations
 }
