@@ -1,4 +1,4 @@
-package main
+package blic
 
 import (
 	"errors"
@@ -55,6 +55,8 @@ func CreateGame(deck []Card, locations []Location, playerCount int) (Game, error
 	if playerCount < 2 || playerCount > 4 {
 		return game, fmt.Errorf("%w: %d", ErrInvalidPlayerCount, playerCount)
 	}
+
+	players := []Player{}
 
 	game.HandleGameCreatedEvent(GameCreatedEvent{
 		uuid.NewString(),

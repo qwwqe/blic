@@ -1,4 +1,4 @@
-package main
+package blic
 
 type Cloneable[T any] interface {
 	Clone() T

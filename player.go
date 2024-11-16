@@ -1,4 +1,4 @@
-package main
+package blic
 
 type PlayerMat struct {
 	CoalMineTiles  []IndustryTile

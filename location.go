@@ -1,4 +1,4 @@
-package main
+package blic
 
 type IndustrySpace struct {
 	Types     []IndustryType
