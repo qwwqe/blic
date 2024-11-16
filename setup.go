@@ -250,4 +250,125 @@ var standardGameRailLinks = [][]string{
 	{"birmingham", "redditch"},
 }
 
+var (
+	ErrDuplicateLocationName = errors.New("Duplicate location name")
+	ErrInvalidLink           = errors.New("Invalid link")
+	ErrNonExistentLocation   = errors.New("Nonexistent location")
+	ErrDuplicateLink         = errors.New("Duplicate link")
+)
+
+// TODO: Just accept a single neighbour lookup and let the caller
+// decide if it's canal or rail?
+func addLink(link []string, locationLookup map[string]*Location,
+	locationCanalNeighbourLookup map[string]map[string]bool,
+	locationRailNeighbourLookup map[string]map[string]bool,
+	canal bool, rail bool,
+) error {
+	if len(link) != 2 {
+		return fmt.Errorf("%w: %v", ErrInvalidLink, link)
+	}
+
+	sourceName, destName := link[0], link[1]
+
+	source, sourceOk := locationLookup[sourceName]
+	if !sourceOk {
+		return fmt.Errorf("%w: %s", ErrNonExistentLocation, sourceName)
+	}
+
+	dest, destOk := locationLookup[destName]
+	if !destOk {
+		return fmt.Errorf("%w: %s", ErrNonExistentLocation, destName)
+	}
+
+	canalDuplicate := canal && (locationCanalNeighbourLookup[sourceName][destName] ||
+		locationCanalNeighbourLookup[destName][sourceName])
+	railDuplicate := rail && (locationRailNeighbourLookup[sourceName][destName] ||
+		locationRailNeighbourLookup[destName][sourceName])
+
+	if canalDuplicate || railDuplicate {
+		return fmt.Errorf("%w: (%s, %s)", ErrDuplicateLink, sourceName, destName)
+	}
+
+	if canal {
+		locationCanalNeighbourLookup[sourceName][destName] = true
+		locationCanalNeighbourLookup[destName][sourceName] = true
+		source.CanalEraNeighbours = append(source.CanalEraNeighbours, dest)
+		dest.CanalEraNeighbours = append(dest.CanalEraNeighbours, source)
+	}
+
+	if rail {
+		locationRailNeighbourLookup[sourceName][destName] = true
+		locationRailNeighbourLookup[destName][sourceName] = true
+		source.RailEraNeighbours = append(source.RailEraNeighbours, dest)
+		dest.RailEraNeighbours = append(dest.RailEraNeighbours, source)
+	}
+
+	return nil
+}
+
+func populateLocationLinks(
+	locations []Location, dualLinks [][]string,
+	canalLinks [][]string, railLinks [][]string,
+) error {
+	locationLookup := map[string]*Location{}
+	locationCanalNeighbourLookup := map[string]map[string]bool{}
+	locationRailNeighbourLookup := map[string]map[string]bool{}
+	for i, location := range locations {
+		if _, ok := locationLookup[location.Name]; ok {
+			return fmt.Errorf("%w: %s", ErrDuplicateLocationName, location.Name)
+		}
+
+		locationLookup[location.Name] = &locations[i]
+		locationCanalNeighbourLookup[location.Name] = map[string]bool{}
+		locationRailNeighbourLookup[location.Name] = map[string]bool{}
+	}
+
+	for _, link := range dualLinks {
+		if err := addLink(
+			link, locationLookup,
+			locationCanalNeighbourLookup, locationRailNeighbourLookup,
+			true, true); err != nil {
+			return err
+		}
+	}
+
+	for _, link := range canalLinks {
+		if err := addLink(
+			link, locationLookup,
+			locationCanalNeighbourLookup, locationRailNeighbourLookup,
+			true, false); err != nil {
+			return err
+		}
+	}
+
+	for _, link := range railLinks {
+		if err := addLink(
+			link, locationLookup,
+			locationCanalNeighbourLookup, locationRailNeighbourLookup,
+			false, true); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func buildStandardLocations() ([]Location, error) {
+	locations := standardGameLocations()
+	if err := populateLocationLinks(locations, standardGameDualLinks, standardGameCanalLinks, standardGameRailLinks); err != nil {
+		return nil, err
+	}
+
+	return locations, nil
+}
+
+func mustBuildStandardLocations() []Location {
+	locations, err := buildStandardLocations()
+	if err != nil {
+		panic("setup: " + err.Error())
+	}
+
+	// check for orphaned locations
+
+	return locations
 }
