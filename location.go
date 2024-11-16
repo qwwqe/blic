@@ -75,7 +75,9 @@ func NewMerchant(
 }
 
 type Location struct {
-	Name               string
+	Name string
+
+	// TODO: Make this into a hypergraph so we can support three-way edges
 	CanalEraNeighbours []*Location
 	RailEraNeighbours  []*Location
 
