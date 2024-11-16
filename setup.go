@@ -257,13 +257,8 @@ var (
 	ErrDuplicateLink         = errors.New("Duplicate link")
 )
 
-// TODO: Just accept a single neighbour lookup and let the caller
-// decide if it's canal or rail?
-func addLink(link []string, locationLookup map[string]*Location,
-	locationCanalNeighbourLookup map[string]map[string]bool,
-	locationRailNeighbourLookup map[string]map[string]bool,
-	canal bool, rail bool,
-) error {
+func addLink(link []string,
+	locationLookup map[string]*Location, neighbourLookup map[string]map[string]bool, isCanal bool) error {
 	if len(link) != 2 {
 		return fmt.Errorf("%w: %v", ErrInvalidLink, link)
 	}
@@ -280,28 +275,22 @@ func addLink(link []string, locationLookup map[string]*Location,
 		return fmt.Errorf("%w: %s", ErrNonExistentLocation, destName)
 	}
 
-	canalDuplicate := canal && (locationCanalNeighbourLookup[sourceName][destName] ||
-		locationCanalNeighbourLookup[destName][sourceName])
-	railDuplicate := rail && (locationRailNeighbourLookup[sourceName][destName] ||
-		locationRailNeighbourLookup[destName][sourceName])
-
-	if canalDuplicate || railDuplicate {
+	if neighbourLookup[sourceName][destName] || neighbourLookup[destName][sourceName] {
 		return fmt.Errorf("%w: (%s, %s)", ErrDuplicateLink, sourceName, destName)
 	}
 
-	if canal {
-		locationCanalNeighbourLookup[sourceName][destName] = true
-		locationCanalNeighbourLookup[destName][sourceName] = true
-		source.CanalEraNeighbours = append(source.CanalEraNeighbours, dest)
-		dest.CanalEraNeighbours = append(dest.CanalEraNeighbours, source)
+	neighbourLookup[sourceName][destName] = true
+	neighbourLookup[destName][sourceName] = true
+
+	sourceNeighbours := &source.CanalEraNeighbours
+	destNeighbours := &dest.CanalEraNeighbours
+	if !isCanal {
+		sourceNeighbours = &source.RailEraNeighbours
+		destNeighbours = &dest.RailEraNeighbours
 	}
 
-	if rail {
-		locationRailNeighbourLookup[sourceName][destName] = true
-		locationRailNeighbourLookup[destName][sourceName] = true
-		source.RailEraNeighbours = append(source.RailEraNeighbours, dest)
-		dest.RailEraNeighbours = append(dest.RailEraNeighbours, source)
-	}
+	(*sourceNeighbours) = append(*sourceNeighbours, dest)
+	(*destNeighbours) = append(*destNeighbours, source)
 
 	return nil
 }
@@ -324,28 +313,23 @@ func populateLocationLinks(
 	}
 
 	for _, link := range dualLinks {
-		if err := addLink(
-			link, locationLookup,
-			locationCanalNeighbourLookup, locationRailNeighbourLookup,
-			true, true); err != nil {
+		if err := addLink(link, locationLookup, locationCanalNeighbourLookup, true); err != nil {
+			return err
+		}
+
+		if err := addLink(link, locationLookup, locationRailNeighbourLookup, false); err != nil {
 			return err
 		}
 	}
 
 	for _, link := range canalLinks {
-		if err := addLink(
-			link, locationLookup,
-			locationCanalNeighbourLookup, locationRailNeighbourLookup,
-			true, false); err != nil {
+		if err := addLink(link, locationLookup, locationCanalNeighbourLookup, true); err != nil {
 			return err
 		}
 	}
 
 	for _, link := range railLinks {
-		if err := addLink(
-			link, locationLookup,
-			locationCanalNeighbourLookup, locationRailNeighbourLookup,
-			false, true); err != nil {
+		if err := addLink(link, locationLookup, locationRailNeighbourLookup, false); err != nil {
 			return err
 		}
 	}
