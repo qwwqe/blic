@@ -27,6 +27,10 @@ type MerchantBeerBonus struct {
 	Amount int
 }
 
+func (s MerchantBeerBonus) Clone() MerchantBeerBonus {
+	return s
+}
+
 type MerchantTile struct {
 	IndustryTypes []IndustryType
 }
@@ -47,30 +51,27 @@ func (s MerchantSpace) Clone() MerchantSpace {
 }
 
 type Merchant struct {
-	Links     int
 	BeerBonus MerchantBeerBonus
-	Spaces    []*MerchantSpace
-
-	MinPlayers int
+	NumLinks  int
+	Spaces    []MerchantSpace
 }
 
 func (m Merchant) Clone() Merchant {
-	m.Spaces = ClonePointerSlice(m.Spaces)
+	m.Spaces = CloneSlice(m.Spaces)
 	return m
 }
 
 func NewMerchant(
-	links int, numSpaces int, minPlayers int,
+	numLinks int, numSpaces int, minPlayers int,
 	beerBonusType MerchantBeerBonusType, beerBonusAmount int,
 ) *Merchant {
 	return &Merchant{
-		Links: links,
+		NumLinks: numLinks,
 		BeerBonus: MerchantBeerBonus{
 			Type:   beerBonusType,
 			Amount: beerBonusAmount,
 		},
-		Spaces:     make([]*MerchantSpace, numSpaces),
-		MinPlayers: minPlayers,
+		Spaces: make([]MerchantSpace, numSpaces),
 	}
 }
 
@@ -78,16 +79,16 @@ type Location struct {
 	Name string
 
 	// TODO: Make this into a hypergraph so we can support three-way edges
-	CanalEraNeighbours []*Location
-	RailEraNeighbours  []*Location
+	CanalEraNeighbours []string
+	RailEraNeighbours  []string
 
 	IndustrySpaces []IndustrySpace
 	Merchant       *Merchant
 }
 
 func (l Location) Clone() Location {
-	l.CanalEraNeighbours = ClonePointerSlice(l.CanalEraNeighbours)
-	l.RailEraNeighbours = ClonePointerSlice(l.RailEraNeighbours)
+	l.CanalEraNeighbours = append(make([]string, len(l.CanalEraNeighbours)), l.CanalEraNeighbours...)
+	l.RailEraNeighbours = append(make([]string, len(l.RailEraNeighbours)), l.RailEraNeighbours...)
 	l.IndustrySpaces = CloneSlice(l.IndustrySpaces)
 	if l.Merchant != nil {
 		m := l.Merchant.Clone()

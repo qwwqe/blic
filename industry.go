@@ -16,9 +16,9 @@ const (
 )
 
 type IndustryTile struct {
-	Type  IndustryType
-	Level int
-	Links int
+	Type     IndustryType
+	Level    int
+	NumLinks int
 
 	CanalEraResources int
 	RailEraResources  int
