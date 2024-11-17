@@ -3,6 +3,7 @@ package blic
 type GameSpec struct {
 	CardSpecs     []CardSpec
 	LocationSpecs []LocationSpec
+	MerchantTileSpecs []MerchantTileSpec
 }
 
 type CardSpec struct {
@@ -114,4 +115,18 @@ type MerchantBeerBonusSpec struct {
 
 func (s *MerchantBeerBonusSpec) Build() MerchantBeerBonus {
 	return s.Clone()
+}
+
+type MerchantTileSpec struct {
+	MerchantTile
+	MinPlayers int
+}
+
+func (s *MerchantTileSpec) Build(playerCount int) *MerchantTile {
+	if playerCount < s.MinPlayers {
+		return nil
+	}
+
+	tile := s.MerchantTile.Clone()
+	return &tile
 }
