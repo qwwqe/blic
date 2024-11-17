@@ -5,6 +5,10 @@ import (
 	"fmt"
 )
 
+// TODO: stub
+var StandardGameSpec = GameSpec{}
+
+// TODO: 改成 Spec 實作
 func standardGameLocations() []Location {
 	return []Location{
 		// Merchants
@@ -258,6 +262,7 @@ var (
 	ErrOrphanLocation        = errors.New("Location has no neighbours")
 )
 
+// TODO: 改成 Spec 實作
 func addLink(link []string,
 	locationLookup map[string]*Location, neighbourLookup map[string]map[string]bool, isCanal bool) error {
 	if len(link) != 2 {
@@ -290,8 +295,8 @@ func addLink(link []string,
 		destNeighbours = &dest.RailEraNeighbours
 	}
 
-	(*sourceNeighbours) = append(*sourceNeighbours, dest)
-	(*destNeighbours) = append(*destNeighbours, source)
+	(*sourceNeighbours) = append(*sourceNeighbours, destName)
+	(*destNeighbours) = append(*destNeighbours, sourceName)
 
 	return nil
 }

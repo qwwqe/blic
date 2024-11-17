@@ -1,12 +1,5 @@
 package blic
 
-import (
-	"errors"
-	"fmt"
-
-	"github.com/google/uuid"
-)
-
 type Era string
 
 const (
@@ -45,29 +38,7 @@ type Game struct {
 	Phase       GamePhase
 }
 
-var (
-	ErrInvalidPlayerCount = errors.New("Invalid player count")
-)
-
-func CreateGame(deck []Card, locations []Location, playerCount int) (Game, error) {
-	game := Game{}
-
-	if playerCount < 2 || playerCount > 4 {
-		return game, fmt.Errorf("%w: %d", ErrInvalidPlayerCount, playerCount)
-	}
-
-	players := []Player{}
-
-	game.HandleGameCreatedEvent(GameCreatedEvent{
-		uuid.NewString(),
-		deck,
-		locations,
-		players,
-	})
-
-	return game, nil
-}
-
+// TODO: Reevaluate this
 func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) {
 	g.Id = e.Id
 	g.Events = []Event{e}

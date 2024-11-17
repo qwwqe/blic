@@ -1,9 +1,46 @@
 package blic
 
+import (
+	"errors"
+	"fmt"
+)
+
+var (
+	ErrInvalidPlayerCount = errors.New("Invalid player count")
+)
+
 type GameSpec struct {
-	CardSpecs     []CardSpec
-	LocationSpecs []LocationSpec
+	Name string
+
+	CardSpecs         []CardSpec
+	LocationSpecs     []LocationSpec
 	MerchantTileSpecs []MerchantTileSpec
+
+	MinPlayerCount int
+	MaxPlayerCount int
+
+	InitialCoalInMarket int
+	InitialIronInMarket int
+}
+
+func (s *GameSpec) Build(playerCount int) (Game, error) {
+	if playerCount < s.MinPlayerCount || playerCount > s.MaxPlayerCount {
+		return Game{}, fmt.Errorf("%w: %d", ErrInvalidPlayerCount, playerCount)
+	}
+
+	// TODO: stub
+	// TODO: Create event and pass it to an empty Game{}
+	/*
+		game := Game{}
+		game.HandleGameCreatedEvent(GameCreatedEvent{
+			uuid.NewString(),
+			game.Deck,
+			game.Locations,
+			game.Players,
+		})
+	*/
+
+	return Game{}, nil
 }
 
 type CardSpec struct {
