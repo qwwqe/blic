@@ -1,11 +1,18 @@
 package blic
 
+type CardType string
+
+const (
+	CardTypeLocation     CardType = "location"
+	CardTypeIndustry     CardType = "industry"
+	CardTypeWildLocation CardType = "wildlocation"
+	CardTypeWildIndustry CardType = "wildindustry"
+)
+
 type Card struct {
 	IndustryTypes []IndustryType
 	LocationName  string
-
-	IsWildLocation bool
-	IsWildIndustry bool
+	Type          CardType
 }
 
 func (c Card) Clone() Card {

@@ -46,9 +46,7 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 type CardSpec struct {
 	IndustryTypes []IndustryType
 	LocationName  string
-
-	IsWildLocation bool
-	IsWildIndustry bool
+	Type          CardType
 
 	AmountByPlayerCount map[int]int
 }
@@ -61,10 +59,9 @@ func (s *CardSpec) Build(playerCount int) []Card {
 			// NOTE: Depending on how many games are expected to be processed
 			// simultaneously, it may be worthwhile not cloning resources
 			// that are in principle expected to be immutable.
-			IndustryTypes:  CloneSlice(s.IndustryTypes),
-			LocationName:   s.LocationName,
-			IsWildLocation: s.IsWildLocation,
-			IsWildIndustry: s.IsWildIndustry,
+			IndustryTypes: CloneSlice(s.IndustryTypes),
+			LocationName:  s.LocationName,
+			Type:          s.Type,
 		})
 	}
 

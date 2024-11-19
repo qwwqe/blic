@@ -55,8 +55,8 @@ func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) {
 	g.WildLocationCards = make([]Card, 0, startingWildCards)
 	g.WildIndustryCards = make([]Card, 0, startingWildCards)
 	for i := 0; i < startingWildCards; i++ {
-		g.WildLocationCards = append(g.WildLocationCards, Card{IsWildLocation: true})
-		g.WildIndustryCards = append(g.WildIndustryCards, Card{IsWildIndustry: true})
+		g.WildLocationCards = append(g.WildLocationCards, Card{Type: CardTypeWildLocation})
+		g.WildIndustryCards = append(g.WildIndustryCards, Card{Type: CardTypeWildIndustry})
 	}
 
 	g.PlayerIndex = 0
