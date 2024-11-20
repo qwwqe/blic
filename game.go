@@ -39,7 +39,7 @@ type Game struct {
 }
 
 // TODO: Reevaluate this
-func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) {
+func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) *Game {
 	g.Id = e.Id
 	g.Events = []Event{e}
 
@@ -62,4 +62,6 @@ func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) {
 	g.PlayerIndex = 0
 	g.Round = 0
 	g.Phase = GamePhaseAction
+
+	return g
 }

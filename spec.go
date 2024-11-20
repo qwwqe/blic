@@ -6,9 +6,13 @@ import (
 )
 
 var (
-	ErrInvalidPlayerCount = errors.New("Invalid player count")
+	ErrInvalidPlayerCount  = errors.New("Invalid player count")
+	ErrInvalidCardType     = errors.New("Invalid card type")
+	ErrNonExistentLocation = errors.New("Nonexistent location")
 )
 
+// TODO: Try generalizing the Spec interface to gracefully accomodate
+// omissions due to player count and whatnot
 type GameSpec struct {
 	Name string
 
@@ -28,19 +32,67 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		return Game{}, fmt.Errorf("%w: %d", ErrInvalidPlayerCount, playerCount)
 	}
 
-	// TODO: stub
-	// TODO: Create event and pass it to an empty Game{}
-	/*
-		game := Game{}
-		game.HandleGameCreatedEvent(GameCreatedEvent{
-			uuid.NewString(),
-			game.Deck,
-			game.Locations,
-			game.Players,
-		})
-	*/
+	deck := []Card{}
+	wildLocationDeck := []Card{}
+	wildIndustryDeck := []Card{}
 
-	return Game{}, nil
+	// TODO: Just record wildcard decks as numbers in the spec
+	// instead of introducing this switch logic
+	for _, cardSpec := range s.CardSpecs {
+		var targetDeck *[]Card
+
+		if cardSpec.Type == CardTypeLocation || cardSpec.Type == CardTypeIndustry {
+			targetDeck = &deck
+		} else if cardSpec.Type == CardTypeWildLocation {
+			targetDeck = &wildLocationDeck
+		} else if cardSpec.Type == CardTypeWildIndustry {
+			targetDeck = &wildIndustryDeck
+		} else {
+			return Game{}, fmt.Errorf("%w: %d", ErrInvalidCardType, playerCount)
+		}
+
+		// TODO: Just return a Card and a number from Build()?
+		*targetDeck = append(*targetDeck, cardSpec.Build(playerCount)...)
+	}
+
+	// TODO: Factor out validation into its own testable function
+	locations := make([]Location, len(s.LocationSpecs))
+	locationLookup := map[string]bool{}
+	for i, locationSpec := range s.LocationSpecs {
+		locations[i] = locationSpec.Build(playerCount)
+		locationLookup[locations[i].Name] = true
+	}
+
+	for _, location := range locations {
+		for _, neighbour := range location.CanalEraNeighbours {
+			if !locationLookup[neighbour] {
+				return Game{}, fmt.Errorf("%w: %s", ErrNonExistentLocation, neighbour)
+			}
+		}
+
+		for _, neighbour := range location.RailEraNeighbours {
+			if !locationLookup[neighbour] {
+				return Game{}, fmt.Errorf("%w: %s", ErrNonExistentLocation, neighbour)
+			}
+		}
+	}
+
+	merchantTiles := []MerchantTile{}
+	for _, merchantTileSpec := range s.MerchantTileSpecs {
+		if tile := merchantTileSpec.Build(playerCount); tile != nil {
+			merchantTiles = append(merchantTiles, *tile)
+		}
+	}
+
+	game := Game{}
+	game.HandleGameCreatedEvent(GameCreatedEvent{
+		uuid.NewString(),
+		game.Deck,
+		game.Locations,
+		game.Players,
+	})
+
+	return game, nil
 }
 
 type CardSpec struct {
