@@ -10,10 +10,17 @@ const (
 type Event interface{}
 
 type GameCreatedEvent struct {
-	Id        string
+	Id   string
+	Type EventType
+
+	GameSpecName string
+
 	Deck      []Card
 	Locations []Location
 	Players   []Player
+
+	NumWildLocationCards int
+	NumWildIndustryCards int
 }
 
 var _ Event = (*GameCreatedEvent)(nil)

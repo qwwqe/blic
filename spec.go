@@ -20,6 +20,9 @@ type GameSpec struct {
 	LocationSpecs     []LocationSpec
 	MerchantTileSpecs []MerchantTileSpec
 
+	NumWildLocationCards int
+	NumWildIndustryCards int
+
 	MinPlayerCount int
 	MaxPlayerCount int
 
@@ -33,26 +36,14 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 	}
 
 	deck := []Card{}
-	wildLocationDeck := []Card{}
-	wildIndustryDeck := []Card{}
 
-	// TODO: Just record wildcard decks as numbers in the spec
-	// instead of introducing this switch logic
 	for _, cardSpec := range s.CardSpecs {
-		var targetDeck *[]Card
-
-		if cardSpec.Type == CardTypeLocation || cardSpec.Type == CardTypeIndustry {
-			targetDeck = &deck
-		} else if cardSpec.Type == CardTypeWildLocation {
-			targetDeck = &wildLocationDeck
-		} else if cardSpec.Type == CardTypeWildIndustry {
-			targetDeck = &wildIndustryDeck
-		} else {
+		if cardSpec.Type != CardTypeLocation && cardSpec.Type != CardTypeIndustry {
 			return Game{}, fmt.Errorf("%w: %d", ErrInvalidCardType, playerCount)
 		}
 
 		// TODO: Just return a Card and a number from Build()?
-		*targetDeck = append(*targetDeck, cardSpec.Build(playerCount)...)
+		deck = append(deck, cardSpec.Build(playerCount)...)
 	}
 
 	// TODO: Factor out validation into its own testable function
@@ -63,6 +54,7 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		locationLookup[locations[i].Name] = true
 	}
 
+	// TODO: Check for bidirectional edges?
 	for _, location := range locations {
 		for _, neighbour := range location.CanalEraNeighbours {
 			if !locationLookup[neighbour] {
@@ -83,6 +75,8 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 			merchantTiles = append(merchantTiles, *tile)
 		}
 	}
+
+	//
 
 	game := Game{}
 	game.HandleGameCreatedEvent(GameCreatedEvent{
