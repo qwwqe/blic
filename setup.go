@@ -255,10 +255,9 @@ var standardGameRailLinks = [][]string{
 }
 
 var (
-	ErrDuplicateLocationName = errors.New("Duplicate location name")
-	ErrInvalidLink           = errors.New("Invalid link")
-	ErrDuplicateLink         = errors.New("Duplicate link")
-	ErrOrphanLocation        = errors.New("Location has no neighbours")
+	ErrInvalidLink    = errors.New("Invalid link")
+	ErrDuplicateLink  = errors.New("Duplicate link")
+	ErrOrphanLocation = errors.New("Location has no neighbours")
 )
 
 // TODO: 改成 Spec 實作

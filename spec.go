@@ -6,9 +6,12 @@ import (
 )
 
 var (
-	ErrInvalidPlayerCount  = errors.New("Invalid player count")
-	ErrInvalidCardType     = errors.New("Invalid card type")
-	ErrNonExistentLocation = errors.New("Nonexistent location")
+	ErrInvalidPlayerCount    = errors.New("Invalid player count")
+	ErrInvalidCardType       = errors.New("Invalid card type")
+	ErrNonExistentLocation   = errors.New("Nonexistent location")
+	ErrDuplicateLocationName = errors.New("Duplicate location name")
+	ErrAsymmetricalEdge      = errors.New("Asymmetrical edge")
+	ErrDuplicateLink         = errors.New("Duplicate link")
 )
 
 // TODO: Try generalizing the Spec interface to gracefully accomodate
@@ -46,27 +49,13 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		deck = append(deck, cardSpec.Build(playerCount)...)
 	}
 
-	// TODO: Factor out validation into its own testable function
 	locations := make([]Location, len(s.LocationSpecs))
-	locationLookup := map[string]bool{}
 	for i, locationSpec := range s.LocationSpecs {
 		locations[i] = locationSpec.Build(playerCount)
-		locationLookup[locations[i].Name] = true
 	}
 
-	// TODO: Check for bidirectional edges?
-	for _, location := range locations {
-		for _, neighbour := range location.CanalEraNeighbours {
-			if !locationLookup[neighbour] {
-				return Game{}, fmt.Errorf("%w: %s", ErrNonExistentLocation, neighbour)
-			}
-		}
-
-		for _, neighbour := range location.RailEraNeighbours {
-			if !locationLookup[neighbour] {
-				return Game{}, fmt.Errorf("%w: %s", ErrNonExistentLocation, neighbour)
-			}
-		}
+	if err := validateLocations(locations); err != nil {
+		return Game{}, err
 	}
 
 	merchantTiles := []MerchantTile{}
@@ -87,6 +76,65 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 	})
 
 	return game, nil
+}
+
+func validateLocations(locations []Location) error {
+	canalEraNeighbours := map[string]map[string]bool{}
+	railEraNeighbours := map[string]map[string]bool{}
+
+	for _, location := range locations {
+		if _, ok := canalEraNeighbours[location.Name]; ok {
+			return fmt.Errorf("%w: %s", ErrDuplicateLocationName, location.Name)
+		}
+
+		if _, ok := railEraNeighbours[location.Name]; ok {
+			return fmt.Errorf("%w: %s", ErrDuplicateLocationName, location.Name)
+		}
+
+		canalEraNeighbours[location.Name] = map[string]bool{}
+		for _, neighbour := range location.CanalEraNeighbours {
+			if canalEraNeighbours[location.Name][neighbour] {
+				return fmt.Errorf("%w: %s -> %s", ErrDuplicateLink, location.Name, neighbour)
+			}
+			canalEraNeighbours[location.Name][neighbour] = true
+		}
+
+		railEraNeighbours[location.Name] = map[string]bool{}
+		for _, neighbour := range location.RailEraNeighbours {
+			if railEraNeighbours[location.Name][neighbour] {
+				return fmt.Errorf("%w: %s -> %s", ErrDuplicateLink, location.Name, neighbour)
+			}
+			railEraNeighbours[location.Name][neighbour] = true
+		}
+	}
+
+	for _, location := range locations {
+		for _, neighbour := range location.CanalEraNeighbours {
+			neighbourLookup, ok := canalEraNeighbours[neighbour]
+
+			if !ok {
+				return fmt.Errorf("%w: %s", ErrNonExistentLocation, neighbour)
+			}
+
+			if _, ok := neighbourLookup[location.Name]; !ok {
+				return fmt.Errorf("%w: %s -> %s", ErrAsymmetricalEdge, location.Name, neighbour)
+			}
+		}
+
+		for _, neighbour := range location.RailEraNeighbours {
+			neighbourLookup, ok := railEraNeighbours[neighbour]
+
+			if !ok {
+				return fmt.Errorf("%w: %s", ErrNonExistentLocation, neighbour)
+			}
+
+			if _, ok := neighbourLookup[location.Name]; !ok {
+				return fmt.Errorf("%w: %s -> %s", ErrAsymmetricalEdge, location.Name, neighbour)
+			}
+		}
+	}
+
+	return nil
 }
 
 type CardSpec struct {
