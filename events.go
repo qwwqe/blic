@@ -13,7 +13,8 @@ type GameCreatedEvent struct {
 	Id   string
 	Type EventType
 
-	GameSpecName string
+	GameSpecName    string
+	GameSpecVersion string
 
 	Deck      []Card
 	Locations []Location
@@ -21,6 +22,9 @@ type GameCreatedEvent struct {
 
 	NumWildLocationCards int
 	NumWildIndustryCards int
+
+	InitialCoalInMarket int
+	InitialIronInMarket int
 }
 
 var _ Event = (*GameCreatedEvent)(nil)

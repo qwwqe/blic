@@ -3,6 +3,8 @@ package blic
 import (
 	"errors"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -17,7 +19,8 @@ var (
 // TODO: Try generalizing the Spec interface to gracefully accomodate
 // omissions due to player count and whatnot
 type GameSpec struct {
-	Name string
+	Name    string
+	Version string
 
 	CardSpecs         []CardSpec
 	LocationSpecs     []LocationSpec
@@ -65,14 +68,32 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		}
 	}
 
-	//
+	// TODO: Place merchant tiles on locations
+	// TODO: Shuffle deck
+	// TODO: Deal cards to players (including one face-down card)
+	// TODO: Initialize player mats (does this need to come from a spec...?)
+	// TODO: Issue starting money
+	// TODO: Determine player order
+
+	players := []Player{}
 
 	game := Game{}
 	game.HandleGameCreatedEvent(GameCreatedEvent{
-		uuid.NewString(),
-		game.Deck,
-		game.Locations,
-		game.Players,
+		Id:   uuid.NewString(),
+		Type: EventTypeGameCreated,
+
+		GameSpecName:    s.Name,
+		GameSpecVersion: s.Version,
+
+		Deck:      deck,
+		Locations: locations,
+		Players:   players,
+
+		NumWildLocationCards: s.NumWildLocationCards,
+		NumWildIndustryCards: s.NumWildIndustryCards,
+
+		InitialCoalInMarket: s.InitialCoalInMarket,
+		InitialIronInMarket: s.InitialIronInMarket,
 	})
 
 	return game, nil
