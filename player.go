@@ -24,12 +24,12 @@ func (mat PlayerMat) Clone() PlayerMat {
 type Player struct {
 	Id string
 
-	Mat           PlayerMat
-	Money         int
-	SpentMoney    int
-	IncomeSpace   int
-	VictoryPoints int
-	Links         int
+	Mat            PlayerMat
+	Money          int
+	SpentMoney     int
+	IncomeSpace    int
+	VictoryPoints  int
+	RemainingLinks int
 
 	Cards         []Card
 	Discards      []Card

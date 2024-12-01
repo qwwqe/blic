@@ -12,6 +12,7 @@ var (
 	ErrInvalidPlayerCount    = errors.New("Invalid player count")
 	ErrInvalidCardType       = errors.New("Invalid card type")
 	ErrIndivisibleDeckSize   = errors.New("Deck size not divisible by player count")
+	ErrDeckTooSmall          = errors.New("Deck too small to deal a full hand to every player")
 	ErrNonExistentLocation   = errors.New("Nonexistent location")
 	ErrDuplicateLocationName = errors.New("Duplicate location name")
 	ErrAsymmetricalEdge      = errors.New("Asymmetrical edge")
@@ -38,6 +39,11 @@ type GameSpec struct {
 
 	InitialCoalInMarket int
 	InitialIronInMarket int
+
+	StartingMoney       int
+	StartingIncomeSpace int
+	HandSize            int
+	LinksPerPlayer      int
 }
 
 func (s *GameSpec) Build(playerCount int) (Game, error) {
@@ -60,6 +66,10 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 
 	if len(deck)%playerCount != 0 {
 		return Game{}, fmt.Errorf("%w: %d %d", ErrIndivisibleDeckSize, len(deck), playerCount)
+	}
+
+	if len(deck) < playerCount*(s.HandSize+1) {
+		return Game{}, fmt.Errorf("%w: %d < %d * (%d + 1)", ErrDeckTooSmall, len(deck), playerCount, s.HandSize)
 	}
 
 	rand.Shuffle(len(deck), func(i, j int) {
@@ -109,12 +119,36 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		return Game{}, fmt.Errorf("%w: %d additional tiles", ErrTooManyMerchantTiles, len(merchantTiles))
 	}
 
-	// TODO: Deal cards to players (including one face-down card)
-	// TODO: Initialize player mats (does this need to come from a spec...?)
-	// TODO: Issue starting money
-	// TODO: Determine player order
+	// Players
 
 	players := []Player{}
+
+	for range playerCount {
+		player := Player{
+			Id: uuid.NewString(),
+
+			Money:          s.StartingMoney,
+			SpentMoney:     0,
+			IncomeSpace:    s.StartingIncomeSpace,
+			VictoryPoints:  0,
+			RemainingLinks: s.LinksPerPlayer,
+
+			Cards: make([]Card, 0, s.HandSize),
+		}
+
+		for range s.HandSize {
+			player.Cards = append(player.Cards, deck[len(deck)-1])
+			deck = deck[:len(deck)-1]
+		}
+
+		hiddenDiscard := deck[len(deck)-1]
+		player.HiddenDiscard = &hiddenDiscard
+		deck = deck[:len(deck)-1]
+
+		players = append(players, player)
+	}
+
+	// TODO: Initialize player mats (does this need to come from a spec...?)
 
 	game := Game{}
 	game.HandleGameCreatedEvent(GameCreatedEvent{
