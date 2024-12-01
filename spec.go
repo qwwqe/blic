@@ -3,6 +3,7 @@ package blic
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 
 	"github.com/google/uuid"
 )
@@ -14,6 +15,8 @@ var (
 	ErrDuplicateLocationName = errors.New("Duplicate location name")
 	ErrAsymmetricalEdge      = errors.New("Asymmetrical edge")
 	ErrDuplicateLink         = errors.New("Duplicate link")
+	ErrTooFewMerchantTiles   = errors.New("Too few merchant tiles")
+	ErrTooManyMerchantTiles  = errors.New("Too many merchant tiles")
 )
 
 // TODO: Try generalizing the Spec interface to gracefully accomodate
@@ -68,7 +71,29 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		}
 	}
 
-	// TODO: Place merchant tiles on locations
+	rand.Shuffle(len(merchantTiles), func(i, j int) {
+		merchantTiles[i], merchantTiles[j] = merchantTiles[j], merchantTiles[i]
+	})
+
+	for _, location := range locations {
+		if location.Merchant == nil {
+			continue
+		}
+
+		for i := 0; i < len(location.Merchant.Spaces); i++ {
+			if len(merchantTiles) == 0 {
+				return Game{}, ErrTooFewMerchantTiles
+			}
+
+			location.Merchant.Spaces[i].Tile = merchantTiles[0]
+			merchantTiles = merchantTiles[1:]
+		}
+	}
+
+	if len(merchantTiles) > 0 {
+		return Game{}, fmt.Errorf("%w: %d additional tiles", ErrTooManyMerchantTiles, len(merchantTiles))
+	}
+
 	// TODO: Shuffle deck
 	// TODO: Deal cards to players (including one face-down card)
 	// TODO: Initialize player mats (does this need to come from a spec...?)

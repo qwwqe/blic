@@ -256,7 +256,6 @@ var standardGameRailLinks = [][]string{
 
 var (
 	ErrInvalidLink    = errors.New("Invalid link")
-	ErrDuplicateLink  = errors.New("Duplicate link")
 	ErrOrphanLocation = errors.New("Location has no neighbours")
 )
 
