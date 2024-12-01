@@ -11,6 +11,7 @@ import (
 var (
 	ErrInvalidPlayerCount    = errors.New("Invalid player count")
 	ErrInvalidCardType       = errors.New("Invalid card type")
+	ErrIndivisibleDeckSize   = errors.New("Deck size not divisible by player count")
 	ErrNonExistentLocation   = errors.New("Nonexistent location")
 	ErrDuplicateLocationName = errors.New("Duplicate location name")
 	ErrAsymmetricalEdge      = errors.New("Asymmetrical edge")
@@ -44,6 +45,8 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		return Game{}, fmt.Errorf("%w: %d", ErrInvalidPlayerCount, playerCount)
 	}
 
+	// Deck
+
 	deck := []Card{}
 
 	for _, cardSpec := range s.CardSpecs {
@@ -55,6 +58,16 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		deck = append(deck, cardSpec.Build(playerCount)...)
 	}
 
+	if len(deck)%playerCount != 0 {
+		return Game{}, fmt.Errorf("%w: %d %d", ErrIndivisibleDeckSize, len(deck), playerCount)
+	}
+
+	rand.Shuffle(len(deck), func(i, j int) {
+		deck[i], deck[j] = deck[j], deck[i]
+	})
+
+	// Locations
+
 	locations := make([]Location, len(s.LocationSpecs))
 	for i, locationSpec := range s.LocationSpecs {
 		locations[i] = locationSpec.Build(playerCount)
@@ -63,6 +76,8 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 	if err := validateLocations(locations); err != nil {
 		return Game{}, err
 	}
+
+	// Merchants
 
 	merchantTiles := []MerchantTile{}
 	for _, merchantTileSpec := range s.MerchantTileSpecs {
@@ -94,7 +109,6 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		return Game{}, fmt.Errorf("%w: %d additional tiles", ErrTooManyMerchantTiles, len(merchantTiles))
 	}
 
-	// TODO: Shuffle deck
 	// TODO: Deal cards to players (including one face-down card)
 	// TODO: Initialize player mats (does this need to come from a spec...?)
 	// TODO: Issue starting money
