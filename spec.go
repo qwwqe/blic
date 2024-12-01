@@ -30,6 +30,7 @@ type GameSpec struct {
 	CardSpecs         []CardSpec
 	LocationSpecs     []LocationSpec
 	MerchantTileSpecs []MerchantTileSpec
+	PlayerMatSpec     PlayerMatSpec
 
 	NumWildLocationCards int
 	NumWildIndustryCards int
@@ -148,7 +149,7 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		players = append(players, player)
 	}
 
-	// TODO: Initialize player mats (does this need to come from a spec...?)
+	// TODO: Initialize player mats from a spec
 
 	game := Game{}
 	game.HandleGameCreatedEvent(GameCreatedEvent{
@@ -288,15 +289,15 @@ func (s *LocationSpec) Build(playerCount int) Location {
 }
 
 type IndustrySpaceSpec struct {
-	Types     []IndustryType
-	Tile      IndustryTileSpec
+	Types []IndustryType
+	// Tile      IndustryTileSpec
 	Resources int
 }
 
 func (s *IndustrySpaceSpec) Build(playerCount int) IndustrySpace {
 	return IndustrySpace{
-		Types:     CloneSlice(s.Types),
-		Tile:      s.Tile.Build(),
+		Types: CloneSlice(s.Types),
+		// Tile:      s.Tile.Build(),
 		Resources: s.Resources,
 	}
 }
@@ -352,3 +353,5 @@ func (s *MerchantTileSpec) Build(playerCount int) *MerchantTile {
 	tile := s.MerchantTile.Clone()
 	return &tile
 }
+
+type PlayerMatSpec struct{}
