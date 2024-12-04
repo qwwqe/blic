@@ -128,6 +128,7 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		player := Player{
 			Id: uuid.NewString(),
 
+			Mat:            s.PlayerMatSpec.Build(),
 			Money:          s.StartingMoney,
 			SpentMoney:     0,
 			IncomeSpace:    s.StartingIncomeSpace,
@@ -148,8 +149,6 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 
 		players = append(players, player)
 	}
-
-	// TODO: Initialize player mats from a spec
 
 	game := Game{}
 	game.HandleGameCreatedEvent(GameCreatedEvent{
@@ -354,4 +353,44 @@ func (s *MerchantTileSpec) Build(playerCount int) *MerchantTile {
 	return &tile
 }
 
-type PlayerMatSpec struct{}
+type PlayerMatSpec struct {
+	CoalMineTiles  []IndustryTileSpec
+	IronWorksTiles []IndustryTileSpec
+	BreweryTiles   []IndustryTileSpec
+
+	ManufacturerTiles []IndustryTileSpec
+	CottonMillTiles   []IndustryTileSpec
+	PotteryTiles      []IndustryTileSpec
+}
+
+func (s *PlayerMatSpec) Build() PlayerMat {
+	mat := PlayerMat{
+		CoalMineTiles:  make([]IndustryTile, 0, len(s.CoalMineTiles)),
+		IronWorksTiles: make([]IndustryTile, 0, len(s.IronWorksTiles)),
+		BreweryTiles:   make([]IndustryTile, 0, len(s.BreweryTiles)),
+
+		ManufacturerTiles: make([]IndustryTile, 0, len(s.ManufacturerTiles)),
+		CottonMillTiles:   make([]IndustryTile, 0, len(s.CottonMillTiles)),
+		PotteryTiles:      make([]IndustryTile, 0, len(s.PotteryTiles)),
+	}
+
+	for _, t := range s.CoalMineTiles {
+		mat.CoalMineTiles = append(mat.CoalMineTiles, t.Build())
+	}
+	for _, t := range s.IronWorksTiles {
+		mat.IronWorksTiles = append(mat.IronWorksTiles, t.Build())
+	}
+	for _, t := range s.BreweryTiles {
+		mat.BreweryTiles = append(mat.BreweryTiles, t.Build())
+	}
+
+	for _, t := range s.ManufacturerTiles {
+		mat.ManufacturerTiles = append(mat.ManufacturerTiles, t.Build())
+	}
+	for _, t := range s.CottonMillTiles {
+		mat.CottonMillTiles = append(mat.CottonMillTiles, t.Build())
+	}
+	for _, t := range s.PotteryTiles {
+		mat.PotteryTiles = append(mat.PotteryTiles, t.Build())
+	}
+}
