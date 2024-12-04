@@ -19,6 +19,7 @@ var (
 	ErrDuplicateLink         = errors.New("Duplicate link")
 	ErrTooFewMerchantTiles   = errors.New("Too few merchant tiles")
 	ErrTooManyMerchantTiles  = errors.New("Too many merchant tiles")
+	ErrIncorrectIndustryType = errors.New("Incorrect industry type")
 )
 
 // TODO: Try generalizing the Spec interface to gracefully accomodate
@@ -147,6 +148,8 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		player.HiddenDiscard = &hiddenDiscard
 		deck = deck[:len(deck)-1]
 
+		validatePlayerMat(player.Mat)
+
 		players = append(players, player)
 	}
 
@@ -225,6 +228,41 @@ func validateLocations(locations []Location) error {
 			if _, ok := neighbourLookup[location.Name]; !ok {
 				return fmt.Errorf("%w: %s -> %s", ErrAsymmetricalEdge, location.Name, neighbour)
 			}
+		}
+	}
+
+	return nil
+}
+
+func validatePlayerMat(playerMat PlayerMat) error {
+	for _, tile := range playerMat.BreweryTiles {
+		if tile.Type != IndustryTypeBrewery {
+			return fmt.Errorf("%w: expected %s but got %s", ErrIncorrectIndustryType, IndustryTypeBrewery, tile.Type)
+		}
+	}
+	for _, tile := range playerMat.CoalMineTiles {
+		if tile.Type != IndustryTypeCoalMine {
+			return fmt.Errorf("%w: expected %s but got %s", ErrIncorrectIndustryType, IndustryTypeCoalMine, tile.Type)
+		}
+	}
+	for _, tile := range playerMat.CottonMillTiles {
+		if tile.Type != IndustryTypeCottonMill {
+			return fmt.Errorf("%w: expected %s but got %s", ErrIncorrectIndustryType, IndustryTypeCottonMill, tile.Type)
+		}
+	}
+	for _, tile := range playerMat.IronWorksTiles {
+		if tile.Type != IndustryTypeIronWorks {
+			return fmt.Errorf("%w: expected %s but got %s", ErrIncorrectIndustryType, IndustryTypeIronWorks, tile.Type)
+		}
+	}
+	for _, tile := range playerMat.ManufacturerTiles {
+		if tile.Type != IndustryTypeManufacturer {
+			return fmt.Errorf("%w: expected %s but got %s", ErrIncorrectIndustryType, IndustryTypeManufacturer, tile.Type)
+		}
+	}
+	for _, tile := range playerMat.PotteryTiles {
+		if tile.Type != IndustryTypePottery {
+			return fmt.Errorf("%w: expected %s but got %s", ErrIncorrectIndustryType, IndustryTypePottery, tile.Type)
 		}
 	}
 
@@ -393,4 +431,6 @@ func (s *PlayerMatSpec) Build() PlayerMat {
 	for _, t := range s.PotteryTiles {
 		mat.PotteryTiles = append(mat.PotteryTiles, t.Build())
 	}
+
+	return mat
 }
