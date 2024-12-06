@@ -22,6 +22,8 @@ var StandardGameSpec = blic.GameSpec{
 	StartingIncomeSpace: 10,
 	HandSize:            8,
 	LinksPerPlayer:      14,
+
+	CardSpecs: cardSpecs,
 }
 
 var cardSpecs = []blic.CardSpec{
