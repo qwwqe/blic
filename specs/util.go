@@ -40,3 +40,15 @@ func newIndustryCardSpec(industryType blic.IndustryType, amountByPlayerCount ...
 
 	return spec
 }
+
+func newIndustryTileSpecs(amount int, tile blic.IndustryTile) []blic.IndustryTileSpec {
+	specs := make([]blic.IndustryTileSpec, 0, amount)
+	for range amount {
+		specs = append(specs, blic.IndustryTileSpec{IndustryTile: tile})
+	}
+	return specs
+}
+
+func address[T any](v T) *T {
+	return &v
+}
