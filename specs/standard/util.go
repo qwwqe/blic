@@ -1,4 +1,4 @@
-package specs
+package standard
 
 import "github.com/qwwqe/blic"
 
