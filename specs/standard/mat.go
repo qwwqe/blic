@@ -45,6 +45,20 @@ var playerMatSpec = blic.PlayerMatSpec{
 		manufacturerTileSpecLevel8,
 		manufacturerTileSpecLevel8,
 	},
+
+	CottonMillTiles: []blic.IndustryTileSpec{
+		cottonMillTileSpecLevel1,
+		cottonMillTileSpecLevel1,
+		cottonMillTileSpecLevel1,
+		cottonMillTileSpecLevel2,
+		cottonMillTileSpecLevel2,
+		cottonMillTileSpecLevel3,
+		cottonMillTileSpecLevel3,
+		cottonMillTileSpecLevel3,
+		cottonMillTileSpecLevel4,
+		cottonMillTileSpecLevel4,
+		cottonMillTileSpecLevel4,
+	},
 }
 
 var coalMineTileSpecLevel1 = blic.IndustryTileSpec{
@@ -484,5 +498,93 @@ var manufacturerTileSpecLevel8 = blic.IndustryTileSpec{
 		CostInPounds: 20,
 		CostInCoal:   0,
 		CostInIron:   2,
+	},
+}
+
+var cottonMillTileSpecLevel1 = blic.IndustryTileSpec{
+	IndustryTile: blic.IndustryTile{
+		Type:     blic.IndustryTypeCottonMill,
+		Level:    1,
+		NumLinks: 1,
+
+		CanalEraResources: 0,
+		RailEraResources:  0,
+
+		VictoryPoints:      5,
+		IncomeBoost:        5,
+		BeerRequiredToSell: 1,
+
+		RequiredEra: address(blic.EraCanal),
+		CanDevelop:  true,
+
+		CostInPounds: 12,
+		CostInCoal:   0,
+		CostInIron:   0,
+	},
+}
+
+var cottonMillTileSpecLevel2 = blic.IndustryTileSpec{
+	IndustryTile: blic.IndustryTile{
+		Type:     blic.IndustryTypeCottonMill,
+		Level:    2,
+		NumLinks: 2,
+
+		CanalEraResources: 0,
+		RailEraResources:  0,
+
+		VictoryPoints:      5,
+		IncomeBoost:        4,
+		BeerRequiredToSell: 1,
+
+		RequiredEra: nil,
+		CanDevelop:  true,
+
+		CostInPounds: 14,
+		CostInCoal:   1,
+		CostInIron:   0,
+	},
+}
+
+var cottonMillTileSpecLevel3 = blic.IndustryTileSpec{
+	IndustryTile: blic.IndustryTile{
+		Type:     blic.IndustryTypeCottonMill,
+		Level:    3,
+		NumLinks: 1,
+
+		CanalEraResources: 0,
+		RailEraResources:  0,
+
+		VictoryPoints:      9,
+		IncomeBoost:        3,
+		BeerRequiredToSell: 1,
+
+		RequiredEra: nil,
+		CanDevelop:  true,
+
+		CostInPounds: 16,
+		CostInCoal:   1,
+		CostInIron:   1,
+	},
+}
+
+var cottonMillTileSpecLevel4 = blic.IndustryTileSpec{
+	IndustryTile: blic.IndustryTile{
+		Type:     blic.IndustryTypeCottonMill,
+		Level:    4,
+		NumLinks: 1,
+
+		CanalEraResources: 0,
+		RailEraResources:  0,
+
+		VictoryPoints:      12,
+		IncomeBoost:        2,
+		BeerRequiredToSell: 1,
+
+		RequiredEra: nil,
+		CanDevelop:  true,
+
+		CostInPounds: 18,
+		CostInCoal:   1,
+		CostInIron:   1,
 	},
 }
