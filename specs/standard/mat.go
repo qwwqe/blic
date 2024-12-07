@@ -59,6 +59,14 @@ var playerMatSpec = blic.PlayerMatSpec{
 		cottonMillTileSpecLevel4,
 		cottonMillTileSpecLevel4,
 	},
+
+	PotteryTiles: []blic.IndustryTileSpec{
+		potteryTileSpecLevel1,
+		potteryTileSpecLevel2,
+		potteryTileSpecLevel3,
+		potteryTileSpecLevel4,
+		potteryTileSpecLevel5,
+	},
 }
 
 var coalMineTileSpecLevel1 = blic.IndustryTileSpec{
@@ -586,5 +594,115 @@ var cottonMillTileSpecLevel4 = blic.IndustryTileSpec{
 		CostInPounds: 18,
 		CostInCoal:   1,
 		CostInIron:   1,
+	},
+}
+
+var potteryTileSpecLevel1 = blic.IndustryTileSpec{
+	IndustryTile: blic.IndustryTile{
+		Type:     blic.IndustryTypePottery,
+		Level:    1,
+		NumLinks: 1,
+
+		CanalEraResources: 0,
+		RailEraResources:  0,
+
+		VictoryPoints:      10,
+		IncomeBoost:        5,
+		BeerRequiredToSell: 1,
+
+		RequiredEra: nil,
+		CanDevelop:  false,
+
+		CostInPounds: 17,
+		CostInCoal:   0,
+		CostInIron:   1,
+	},
+}
+
+var potteryTileSpecLevel2 = blic.IndustryTileSpec{
+	IndustryTile: blic.IndustryTile{
+		Type:     blic.IndustryTypePottery,
+		Level:    2,
+		NumLinks: 1,
+
+		CanalEraResources: 0,
+		RailEraResources:  0,
+
+		VictoryPoints:      1,
+		IncomeBoost:        1,
+		BeerRequiredToSell: 1,
+
+		RequiredEra: nil,
+		CanDevelop:  true,
+
+		CostInPounds: 0,
+		CostInCoal:   1,
+		CostInIron:   0,
+	},
+}
+
+var potteryTileSpecLevel3 = blic.IndustryTileSpec{
+	IndustryTile: blic.IndustryTile{
+		Type:     blic.IndustryTypePottery,
+		Level:    3,
+		NumLinks: 1,
+
+		CanalEraResources: 0,
+		RailEraResources:  0,
+
+		VictoryPoints:      11,
+		IncomeBoost:        5,
+		BeerRequiredToSell: 2,
+
+		RequiredEra: nil,
+		CanDevelop:  false,
+
+		CostInPounds: 22,
+		CostInCoal:   2,
+		CostInIron:   0,
+	},
+}
+
+var potteryTileSpecLevel4 = blic.IndustryTileSpec{
+	IndustryTile: blic.IndustryTile{
+		Type:     blic.IndustryTypePottery,
+		Level:    4,
+		NumLinks: 1,
+
+		CanalEraResources: 0,
+		RailEraResources:  0,
+
+		VictoryPoints:      1,
+		IncomeBoost:        1,
+		BeerRequiredToSell: 1,
+
+		RequiredEra: nil,
+		CanDevelop:  true,
+
+		CostInPounds: 0,
+		CostInCoal:   1,
+		CostInIron:   0,
+	},
+}
+
+var potteryTileSpecLevel5 = blic.IndustryTileSpec{
+	IndustryTile: blic.IndustryTile{
+		Type:     blic.IndustryTypePottery,
+		Level:    5,
+		NumLinks: 1,
+
+		CanalEraResources: 0,
+		RailEraResources:  0,
+
+		VictoryPoints:      20,
+		IncomeBoost:        5,
+		BeerRequiredToSell: 2,
+
+		RequiredEra: address(blic.EraRail),
+		CanDevelop:  true,
+
+		CostInPounds: 24,
+		CostInCoal:   2,
+		CostInIron:   0,
 	},
 }
