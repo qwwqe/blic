@@ -15,6 +15,13 @@ var playerMatSpec = blic.PlayerMatSpec{
 		coalMineTileSpecLevel4,
 	},
 
+	IronWorksTiles: []blic.IndustryTileSpec{
+		ironWorksTileSpecLevel1,
+		ironWorksTileSpecLevel2,
+		ironWorksTileSpecLevel3,
+		ironWorksTileSpecLevel4,
+	},
+
 	BreweryTiles: []blic.IndustryTileSpec{
 		breweryTileSpecLevel1,
 		breweryTileSpecLevel1,
@@ -111,6 +118,94 @@ var coalMineTileSpecLevel4 = blic.IndustryTileSpec{
 		CostInPounds: 10,
 		CostInCoal:   0,
 		CostInIron:   1,
+	},
+}
+
+var ironWorksTileSpecLevel1 = blic.IndustryTileSpec{
+	IndustryTile: blic.IndustryTile{
+		Type:     blic.IndustryTypeIronWorks,
+		Level:    1,
+		NumLinks: 1,
+
+		CanalEraResources: 4,
+		RailEraResources:  4,
+
+		VictoryPoints:      3,
+		IncomeBoost:        3,
+		BeerRequiredToSell: 0,
+
+		RequiredEra: address(blic.EraCanal),
+		CanDevelop:  true,
+
+		CostInPounds: 5,
+		CostInCoal:   1,
+		CostInIron:   0,
+	},
+}
+
+var ironWorksTileSpecLevel2 = blic.IndustryTileSpec{
+	IndustryTile: blic.IndustryTile{
+		Type:     blic.IndustryTypeIronWorks,
+		Level:    2,
+		NumLinks: 1,
+
+		CanalEraResources: 4,
+		RailEraResources:  4,
+
+		VictoryPoints:      5,
+		IncomeBoost:        3,
+		BeerRequiredToSell: 0,
+
+		RequiredEra: nil,
+		CanDevelop:  true,
+
+		CostInPounds: 7,
+		CostInCoal:   1,
+		CostInIron:   0,
+	},
+}
+
+var ironWorksTileSpecLevel3 = blic.IndustryTileSpec{
+	IndustryTile: blic.IndustryTile{
+		Type:     blic.IndustryTypeIronWorks,
+		Level:    3,
+		NumLinks: 1,
+
+		CanalEraResources: 5,
+		RailEraResources:  5,
+
+		VictoryPoints:      7,
+		IncomeBoost:        2,
+		BeerRequiredToSell: 0,
+
+		RequiredEra: nil,
+		CanDevelop:  true,
+
+		CostInPounds: 9,
+		CostInCoal:   1,
+		CostInIron:   0,
+	},
+}
+
+var ironWorksTileSpecLevel4 = blic.IndustryTileSpec{
+	IndustryTile: blic.IndustryTile{
+		Type:     blic.IndustryTypeIronWorks,
+		Level:    4,
+		NumLinks: 1,
+
+		CanalEraResources: 6,
+		RailEraResources:  6,
+
+		VictoryPoints:      9,
+		IncomeBoost:        1,
+		BeerRequiredToSell: 0,
+
+		RequiredEra: nil,
+		CanDevelop:  true,
+
+		CostInPounds: 12,
+		CostInCoal:   1,
+		CostInIron:   0,
 	},
 }
 
