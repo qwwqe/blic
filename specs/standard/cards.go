@@ -25,6 +25,7 @@ var cardSpecs = []blic.CardSpec{
 	newLocationCardSpec("uttoxeter", 0, 1, 2),
 	newLocationCardSpec("belper", 0, 0, 2),
 	newLocationCardSpec("derby", 0, 0, 3),
+
 	newIndustryCardSpec(blic.IndustryTypeBrewery, 5, 5, 5),
 	newIndustryCardSpec(blic.IndustryTypeCoalMine, 2, 2, 3),
 	newIndustryCardSpec(blic.IndustryTypeIronWorks, 4, 4, 4),
