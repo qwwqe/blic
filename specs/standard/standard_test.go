@@ -44,3 +44,30 @@ func TestIndustryTiles(t *testing.T) {
 		}
 	})
 }
+
+func TestMerchantTiles(t *testing.T) {
+	cases := []struct {
+		playerCount int
+		tileCount   int
+	}{
+		{2, 5},
+		{3, 7},
+		{4, 9},
+	}
+
+	for _, testCase := range cases {
+		t.Run(fmt.Sprintf("Merchant tile count in %d-player game", testCase.playerCount), func(t *testing.T) {
+			count := 0
+			for _, spec := range merchantTileSpecs {
+				tile := spec.Build(testCase.playerCount)
+				if tile != nil {
+					count++
+				}
+			}
+
+			if count != testCase.tileCount {
+				t.Errorf("Expected %d tiles but got %d", testCase.tileCount, count)
+			}
+		})
+	}
+}
