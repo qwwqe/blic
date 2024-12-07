@@ -30,3 +30,17 @@ func TestCards(t *testing.T) {
 
 	}
 }
+
+func TestIndustryTiles(t *testing.T) {
+	t.Run("Industry tile count", func(t *testing.T) {
+		const standardTileCount = 45
+
+		mat := playerMatSpec.Build()
+		count := len(mat.BreweryTiles) + len(mat.CoalMineTiles) + len(mat.CottonMillTiles) +
+			len(mat.IronWorksTiles) + len(mat.ManufacturerTiles) + len(mat.PotteryTiles)
+
+		if count != standardTileCount {
+			t.Errorf("Expected %d tiles but got %d", standardTileCount, count)
+		}
+	})
+}
