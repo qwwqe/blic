@@ -1,9 +1,10 @@
 package blic
 
 type IndustrySpace struct {
-	Types     []IndustryType
-	Tile      IndustryTile
-	Resources int
+	Types        []IndustryType
+	Tile         IndustryTile
+	TilePlayerId string // TODO: 考慮把 PlayerdId 掛在 IndustryTile 身上
+	Resources    int
 }
 
 func (s IndustrySpace) Clone() IndustrySpace {
@@ -78,21 +79,20 @@ func NewMerchant(
 type Location struct {
 	Name string
 
-	// TODO: Make this into a hypergraph so we can support three-way edges
-	CanalEraNeighbours []string
-	RailEraNeighbours  []string
-
 	IndustrySpaces []IndustrySpace
 	Merchant       *Merchant
 }
 
 func (l Location) Clone() Location {
-	l.CanalEraNeighbours = append(make([]string, len(l.CanalEraNeighbours)), l.CanalEraNeighbours...)
-	l.RailEraNeighbours = append(make([]string, len(l.RailEraNeighbours)), l.RailEraNeighbours...)
 	l.IndustrySpaces = CloneSlice(l.IndustrySpaces)
 	if l.Merchant != nil {
 		m := l.Merchant.Clone()
 		l.Merchant = &m
 	}
 	return l
+}
+
+type Connection struct {
+	LocationNames []string
+	LinkPlayerId  string // 考慮正式定義包含 PlayerId 和 Era 的 LinkTile
 }

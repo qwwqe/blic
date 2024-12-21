@@ -28,10 +28,12 @@ type GameSpec struct {
 	Name    string
 	Version string
 
-	CardSpecs         []CardSpec
-	LocationSpecs     []LocationSpec
-	MerchantTileSpecs []MerchantTileSpec
-	PlayerMatSpec     PlayerMatSpec
+	CardSpecs               []CardSpec
+	LocationSpecs           []LocationSpec
+	CanalEraConnectionSpecs []ConnectionSpec
+	RailEraConnectionSpecs  []ConnectionSpec
+	MerchantTileSpecs       []MerchantTileSpec
+	PlayerMatSpec           PlayerMatSpec
 
 	NumWildLocationCards int
 	NumWildIndustryCards int
@@ -79,13 +81,28 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 	})
 
 	// Locations
-
 	locations := make([]Location, len(s.LocationSpecs))
 	for i, locationSpec := range s.LocationSpecs {
 		locations[i] = locationSpec.Build(playerCount)
 	}
 
-	if err := validateLocations(locations); err != nil {
+	// Connections
+	canalEraConnections := make([]Connection, len(s.CanalEraConnectionSpecs))
+	for i, connectionSpec := range s.CanalEraConnectionSpecs {
+		canalEraConnections[i] = connectionSpec.Build()
+	}
+
+	railEraConnections := make([]Connection, len(s.RailEraConnectionSpecs))
+	for i, connectionSpec := range s.RailEraConnectionSpecs {
+		railEraConnections[i] = connectionSpec.Build()
+	}
+
+	// if err := validateLocations(locations); err != nil {
+	if err := validateConnections(locations, canalEraConnections); err != nil {
+		return Game{}, err
+	}
+
+	if err := validateConnections(locations, railEraConnections); err != nil {
 		return Game{}, err
 	}
 
@@ -306,13 +323,8 @@ type LocationSpec struct {
 
 func (s *LocationSpec) Build(playerCount int) Location {
 	location := Location{
-		Name:               s.Name,
-		CanalEraNeighbours: make([]string, len(s.CanalEraNeighbours)),
-		RailEraNeighbours:  make([]string, len(s.RailEraNeighbours)),
+		Name: s.Name,
 	}
-
-	copy(location.CanalEraNeighbours, s.CanalEraNeighbours)
-	copy(location.RailEraNeighbours, s.RailEraNeighbours)
 
 	for _, industrySpaceSpec := range s.IndustrySpaces {
 		location.IndustrySpaces = append(location.IndustrySpaces, industrySpaceSpec.Build(playerCount))
@@ -323,6 +335,19 @@ func (s *LocationSpec) Build(playerCount int) Location {
 	}
 
 	return location
+}
+
+type ConnectionSpec struct {
+	LocationNames []string
+}
+
+func (s *ConnectionSpec) Build() Connection {
+	c := Connection{
+		LocationNames: make([]string, len(s.LocationNames)),
+	}
+	copy(c.LocationNames, s.LocationNames)
+
+	return c
 }
 
 type IndustrySpaceSpec struct {

@@ -21,8 +21,10 @@ type Game struct {
 	Id     string
 	Events []Event
 
-	Players   []Player
-	Locations []Location
+	Players             []Player
+	Locations           []Location
+	CanalEraConnections []Connection
+	RailEraConnections  []Connection
 
 	CoalInMarket int
 	IronInMarket int
