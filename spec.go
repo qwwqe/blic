@@ -15,8 +15,6 @@ var (
 	ErrDeckTooSmall          = errors.New("Deck too small to deal a full hand to every player")
 	ErrNonExistentLocation   = errors.New("Nonexistent location")
 	ErrDuplicateLocationName = errors.New("Duplicate location name")
-	ErrAsymmetricalEdge      = errors.New("Asymmetrical edge")
-	ErrDuplicateLink         = errors.New("Duplicate link")
 	ErrTooFewMerchantTiles   = errors.New("Too few merchant tiles")
 	ErrTooManyMerchantTiles  = errors.New("Too many merchant tiles")
 	ErrIncorrectIndustryType = errors.New("Incorrect industry type")
@@ -81,12 +79,18 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 	})
 
 	// Locations
+
 	locations := make([]Location, len(s.LocationSpecs))
 	for i, locationSpec := range s.LocationSpecs {
 		locations[i] = locationSpec.Build(playerCount)
 	}
 
+	if err := validateLocations(locations); err != nil {
+		return Game{}, err
+	}
+
 	// Connections
+
 	canalEraConnections := make([]Connection, len(s.CanalEraConnectionSpecs))
 	for i, connectionSpec := range s.CanalEraConnectionSpecs {
 		canalEraConnections[i] = connectionSpec.Build()
@@ -97,7 +101,6 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		railEraConnections[i] = connectionSpec.Build()
 	}
 
-	// if err := validateLocations(locations); err != nil {
 	if err := validateConnections(locations, canalEraConnections); err != nil {
 		return Game{}, err
 	}
@@ -193,57 +196,27 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 }
 
 func validateLocations(locations []Location) error {
-	canalEraNeighbours := map[string]map[string]bool{}
-	railEraNeighbours := map[string]map[string]bool{}
-
+	locationLookup := map[string]bool{}
 	for _, location := range locations {
-		if _, ok := canalEraNeighbours[location.Name]; ok {
+		if locationLookup[location.Name] {
 			return fmt.Errorf("%w: %s", ErrDuplicateLocationName, location.Name)
 		}
-
-		if _, ok := railEraNeighbours[location.Name]; ok {
-			return fmt.Errorf("%w: %s", ErrDuplicateLocationName, location.Name)
-		}
-
-		canalEraNeighbours[location.Name] = map[string]bool{}
-		for _, neighbour := range location.CanalEraNeighbours {
-			if canalEraNeighbours[location.Name][neighbour] {
-				return fmt.Errorf("%w: %s -> %s", ErrDuplicateLink, location.Name, neighbour)
-			}
-			canalEraNeighbours[location.Name][neighbour] = true
-		}
-
-		railEraNeighbours[location.Name] = map[string]bool{}
-		for _, neighbour := range location.RailEraNeighbours {
-			if railEraNeighbours[location.Name][neighbour] {
-				return fmt.Errorf("%w: %s -> %s", ErrDuplicateLink, location.Name, neighbour)
-			}
-			railEraNeighbours[location.Name][neighbour] = true
-		}
+		locationLookup[location.Name] = true
 	}
 
+	return nil
+}
+
+func validateConnections(locations []Location, connections []Connection) error {
+	locationLookup := map[string]bool{}
 	for _, location := range locations {
-		for _, neighbour := range location.CanalEraNeighbours {
-			neighbourLookup, ok := canalEraNeighbours[neighbour]
+		locationLookup[location.Name] = true
+	}
 
-			if !ok {
-				return fmt.Errorf("%w: %s", ErrNonExistentLocation, neighbour)
-			}
-
-			if _, ok := neighbourLookup[location.Name]; !ok {
-				return fmt.Errorf("%w: %s -> %s", ErrAsymmetricalEdge, location.Name, neighbour)
-			}
-		}
-
-		for _, neighbour := range location.RailEraNeighbours {
-			neighbourLookup, ok := railEraNeighbours[neighbour]
-
-			if !ok {
-				return fmt.Errorf("%w: %s", ErrNonExistentLocation, neighbour)
-			}
-
-			if _, ok := neighbourLookup[location.Name]; !ok {
-				return fmt.Errorf("%w: %s -> %s", ErrAsymmetricalEdge, location.Name, neighbour)
+	for _, connection := range connections {
+		for _, locationName := range connection.LocationNames {
+			if !locationLookup[locationName] {
+				return fmt.Errorf("%w: %s", ErrNonExistentLocation, locationName)
 			}
 		}
 	}
