@@ -16,9 +16,11 @@ type GameCreatedEvent struct {
 	GameSpecName    string
 	GameSpecVersion string
 
-	Deck      []Card
-	Locations []Location
-	Players   []Player
+	Deck                []Card
+	Locations           []Location
+	CanalEraConnections []Connection
+	RailEraConnections  []Connection
+	Players             []Player
 
 	NumWildLocationCards int
 	NumWildIndustryCards int

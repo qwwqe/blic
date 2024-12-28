@@ -47,6 +47,8 @@ func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) *Game {
 
 	g.Players = CloneSlice(g.Players)
 	g.Locations = CloneSlice(e.Locations)
+	g.CanalEraConnections = CloneSlice(e.CanalEraConnections)
+	g.RailEraConnections = CloneSlice(e.RailEraConnections)
 
 	g.CoalInMarket = startingCoalInMarket
 	g.IronInMarket = startingIronInMarket

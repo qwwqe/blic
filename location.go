@@ -62,20 +62,6 @@ func (m Merchant) Clone() Merchant {
 	return m
 }
 
-func NewMerchant(
-	numLinks int, numSpaces int, minPlayers int,
-	beerBonusType MerchantBeerBonusType, beerBonusAmount int,
-) *Merchant {
-	return &Merchant{
-		NumLinks: numLinks,
-		BeerBonus: MerchantBeerBonus{
-			Type:   beerBonusType,
-			Amount: beerBonusAmount,
-		},
-		Spaces: make([]MerchantSpace, numSpaces),
-	}
-}
-
 type Location struct {
 	Name string
 
@@ -95,4 +81,12 @@ func (l Location) Clone() Location {
 type Connection struct {
 	LocationNames []string
 	LinkPlayerId  string // 考慮正式定義包含 PlayerId 和 Era 的 LinkTile
+}
+
+func (c Connection) Clone() Connection {
+	locationNames := make([]string, len(c.LocationNames))
+	copy(locationNames, c.LocationNames)
+	c.LocationNames = locationNames
+
+	return c
 }

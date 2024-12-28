@@ -23,7 +23,8 @@ var GameSpec = blic.GameSpec{
 	HandSize:            8,
 	LinksPerPlayer:      14,
 
-	CardSpecs:         cardSpecs,
-	PlayerMatSpec:     playerMatSpec,
-	MerchantTileSpecs: merchantTileSpecs,
+	CardSpecs:               cardSpecs,
+	PlayerMatSpec:           playerMatSpec,
+	MerchantTileSpecs:       merchantTileSpecs,
+	LocationSpecs:           locationSpecs,
 }

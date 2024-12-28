@@ -287,9 +287,6 @@ func (s *CardSpec) Build(playerCount int) []Card {
 type LocationSpec struct {
 	Name string
 
-	CanalEraNeighbours []string
-	RailEraNeighbours  []string
-
 	IndustrySpaces []IndustrySpaceSpec
 	Merchant       *MerchantSpec
 }
