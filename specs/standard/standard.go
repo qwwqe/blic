@@ -27,4 +27,6 @@ var GameSpec = blic.GameSpec{
 	PlayerMatSpec:           playerMatSpec,
 	MerchantTileSpecs:       merchantTileSpecs,
 	LocationSpecs:           locationSpecs,
+	CanalEraConnectionSpecs: canalEraConnectionSpecs,
+	RailEraConnectionSpecs:  railEraConnectionSpecs,
 }
