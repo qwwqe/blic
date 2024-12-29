@@ -53,124 +53,35 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		return Game{}, fmt.Errorf("%w: %d", ErrInvalidPlayerCount, playerCount)
 	}
 
-	// Deck
-
-	deck := []Card{}
-
-	for _, cardSpec := range s.CardSpecs {
-		if cardSpec.Type != CardTypeLocation && cardSpec.Type != CardTypeIndustry {
-			return Game{}, fmt.Errorf("%w: %d", ErrInvalidCardType, playerCount)
-		}
-
-		// TODO: Just return a Card and a number from Build()?
-		deck = append(deck, cardSpec.Build(playerCount)...)
-	}
-
-	if len(deck)%playerCount != 0 {
-		return Game{}, fmt.Errorf("%w: %d %d", ErrIndivisibleDeckSize, len(deck), playerCount)
-	}
-
-	if len(deck) < playerCount*(s.HandSize+1) {
-		return Game{}, fmt.Errorf("%w: %d < %d * (%d + 1)", ErrDeckTooSmall, len(deck), playerCount, s.HandSize)
-	}
-
-	rand.Shuffle(len(deck), func(i, j int) {
-		deck[i], deck[j] = deck[j], deck[i]
-	})
-
-	// Locations
-
-	locations := make([]Location, len(s.LocationSpecs))
-	for i, locationSpec := range s.LocationSpecs {
-		locations[i] = locationSpec.Build(playerCount)
-	}
-
-	if err := validateLocations(locations); err != nil {
+	deck, err := buildDeck(*s, playerCount)
+	if err != nil {
 		return Game{}, err
 	}
 
-	// Connections
-
-	canalEraConnections := make([]Connection, len(s.CanalEraConnectionSpecs))
-	for i, connectionSpec := range s.CanalEraConnectionSpecs {
-		canalEraConnections[i] = connectionSpec.Build()
-	}
-
-	railEraConnections := make([]Connection, len(s.RailEraConnectionSpecs))
-	for i, connectionSpec := range s.RailEraConnectionSpecs {
-		railEraConnections[i] = connectionSpec.Build()
-	}
-
-	if err := validateConnections(locations, canalEraConnections); err != nil {
+	locations, err := buildLocations(*s, playerCount)
+	if err != nil {
 		return Game{}, err
 	}
 
-	if err := validateConnections(locations, railEraConnections); err != nil {
+	canalEraConnections, err := buildCanalEraConnections(*s, locations)
+	if err != nil {
 		return Game{}, err
 	}
 
-	// Merchants
-
-	merchantTiles := []MerchantTile{}
-	for _, merchantTileSpec := range s.MerchantTileSpecs {
-		if tile := merchantTileSpec.Build(playerCount); tile != nil {
-			merchantTiles = append(merchantTiles, *tile)
-		}
+	railEraConnections, err := buildRailEraConnections(*s, locations)
+	if err != nil {
+		return Game{}, err
 	}
 
-	rand.Shuffle(len(merchantTiles), func(i, j int) {
-		merchantTiles[i], merchantTiles[j] = merchantTiles[j], merchantTiles[i]
-	})
-
-	for _, location := range locations {
-		if location.Merchant == nil {
-			continue
-		}
-
-		for i := 0; i < len(location.Merchant.Spaces); i++ {
-			if len(merchantTiles) == 0 {
-				return Game{}, ErrTooFewMerchantTiles
-			}
-
-			location.Merchant.Spaces[i].Tile = merchantTiles[0]
-			merchantTiles = merchantTiles[1:]
-		}
+	// TODO: Return merchant tiles and define a separate function for their "placement"
+	if err := buildMerchants(*s, playerCount, locations); err != nil {
+		return Game{}, err
 	}
 
-	if len(merchantTiles) > 0 {
-		return Game{}, fmt.Errorf("%w: %d additional tiles", ErrTooManyMerchantTiles, len(merchantTiles))
-	}
-
-	// Players
-
-	players := []Player{}
-
-	for range playerCount {
-		player := Player{
-			Id: uuid.NewString(),
-
-			Mat:            s.PlayerMatSpec.Build(),
-			Money:          s.StartingMoney,
-			SpentMoney:     0,
-			IncomeSpace:    s.StartingIncomeSpace,
-			VictoryPoints:  0,
-			RemainingLinks: s.LinksPerPlayer,
-
-			Cards: make([]Card, 0, s.HandSize),
-		}
-
-		for range s.HandSize {
-			player.Cards = append(player.Cards, deck[len(deck)-1])
-			deck = deck[:len(deck)-1]
-		}
-
-		hiddenDiscard := deck[len(deck)-1]
-		player.HiddenDiscard = &hiddenDiscard
-		deck = deck[:len(deck)-1]
-
-		validatePlayerMat(player.Mat)
-
-		players = append(players, player)
+	// TODO: Define a separate function for drawing of cards from the deck?
+	players, err := buildPlayers(*s, playerCount, &deck)
+	if err != nil {
+		return Game{}, err
 	}
 
 	game := Game{}
@@ -195,18 +106,6 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 	})
 
 	return game, nil
-}
-
-func validateLocations(locations []Location) error {
-	locationLookup := map[string]bool{}
-	for _, location := range locations {
-		if locationLookup[location.Name] {
-			return fmt.Errorf("%w: %s", ErrDuplicateLocationName, location.Name)
-		}
-		locationLookup[location.Name] = true
-	}
-
-	return nil
 }
 
 func validateConnections(locations []Location, connections []Connection) error {
@@ -259,6 +158,154 @@ func validatePlayerMat(playerMat PlayerMat) error {
 	}
 
 	return nil
+}
+
+func buildDeck(spec GameSpec, numPlayers int) ([]Card, error) {
+	deck := []Card{}
+
+	for _, cardSpec := range spec.CardSpecs {
+		if cardSpec.Type != CardTypeLocation && cardSpec.Type != CardTypeIndustry {
+			return nil, fmt.Errorf("%w: %d", ErrInvalidCardType, numPlayers)
+		}
+
+		// TODO: Just return a Card and a number from Build()?
+		deck = append(deck, cardSpec.Build(numPlayers)...)
+	}
+
+	if len(deck)%numPlayers != 0 {
+		return nil, fmt.Errorf("%w: %d %d", ErrIndivisibleDeckSize, len(deck), numPlayers)
+	}
+
+	if len(deck) < numPlayers*(spec.HandSize+1) {
+		return nil, fmt.Errorf("%w: %d < %d * (%d + 1)", ErrDeckTooSmall, len(deck), numPlayers, spec.HandSize)
+	}
+
+	rand.Shuffle(len(deck), func(i, j int) {
+		deck[i], deck[j] = deck[j], deck[i]
+	})
+
+	return deck, nil
+}
+
+func buildLocations(spec GameSpec, numPlayers int) ([]Location, error) {
+	locations := make([]Location, len(spec.LocationSpecs))
+	for i, locationSpec := range spec.LocationSpecs {
+		locations[i] = locationSpec.Build(numPlayers)
+	}
+
+	locationLookup := map[string]bool{}
+	for _, location := range locations {
+		if locationLookup[location.Name] {
+			return nil, fmt.Errorf("%w: %s", ErrDuplicateLocationName, location.Name)
+		}
+		locationLookup[location.Name] = true
+	}
+
+	return locations, nil
+}
+
+func buildCanalEraConnections(spec GameSpec, locations []Location) ([]Connection, error) {
+	canalEraConnections := make([]Connection, len(spec.CanalEraConnectionSpecs))
+	for i, connectionSpec := range spec.CanalEraConnectionSpecs {
+		canalEraConnections[i] = connectionSpec.Build()
+	}
+
+	if err := validateConnections(locations, canalEraConnections); err != nil {
+		return nil, err
+	}
+
+	return canalEraConnections, nil
+}
+
+func buildRailEraConnections(spec GameSpec, locations []Location) ([]Connection, error) {
+	railEraConnections := make([]Connection, len(spec.RailEraConnectionSpecs))
+	for i, connectionSpec := range spec.RailEraConnectionSpecs {
+		railEraConnections[i] = connectionSpec.Build()
+	}
+
+	if err := validateConnections(locations, railEraConnections); err != nil {
+		return nil, err
+	}
+
+	return railEraConnections, nil
+}
+
+func buildMerchants(spec GameSpec, numPlayers int, locations []Location) error {
+	merchantTiles := []MerchantTile{}
+	for _, merchantTileSpec := range spec.MerchantTileSpecs {
+		if tile := merchantTileSpec.Build(numPlayers); tile != nil {
+			merchantTiles = append(merchantTiles, *tile)
+		}
+	}
+
+	rand.Shuffle(len(merchantTiles), func(i, j int) {
+		merchantTiles[i], merchantTiles[j] = merchantTiles[j], merchantTiles[i]
+	})
+
+	count := 0
+	for _, l := range locations {
+		if l.Merchant != nil {
+			count += len(l.Merchant.Spaces)
+		}
+	}
+
+	for i := range len(locations) {
+		if locations[i].Merchant == nil {
+			continue
+		}
+
+		for j := 0; j < len(locations[i].Merchant.Spaces); j++ {
+			if len(merchantTiles) == 0 {
+				fmt.Println(locations[i].Merchant.Spaces)
+				return ErrTooFewMerchantTiles
+			}
+
+			locations[i].Merchant.Spaces[j].Tile = merchantTiles[0]
+			merchantTiles = merchantTiles[1:]
+		}
+	}
+
+	if len(merchantTiles) > 0 {
+		return fmt.Errorf("%w: %d additional tiles", ErrTooManyMerchantTiles, len(merchantTiles))
+	}
+
+	return nil
+}
+
+func buildPlayers(spec GameSpec, numPlayers int, deck *[]Card) ([]Player, error) {
+	players := []Player{}
+
+	for range numPlayers {
+		player := Player{
+			Id: uuid.NewString(),
+
+			Mat:            spec.PlayerMatSpec.Build(),
+			Money:          spec.StartingMoney,
+			SpentMoney:     0,
+			IncomeSpace:    spec.StartingIncomeSpace,
+			VictoryPoints:  0,
+			RemainingLinks: spec.LinksPerPlayer,
+
+			Cards: make([]Card, 0, spec.HandSize),
+		}
+
+		for range spec.HandSize {
+			player.Cards = append(player.Cards, (*deck)[len(*deck)-1])
+			*deck = (*deck)[:len(*deck)-1]
+		}
+
+		hiddenDiscard := (*deck)[len(*deck)-1]
+		player.HiddenDiscard = &hiddenDiscard
+		*deck = (*deck)[:len(*deck)-1]
+
+		if err := validatePlayerMat(player.Mat); err != nil {
+			return nil, err
+		}
+
+		players = append(players, player)
+	}
+
+	return players, nil
 }
 
 type CardSpec struct {
