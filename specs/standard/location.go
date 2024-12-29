@@ -28,7 +28,7 @@ var locationSpecs = []blic.LocationSpec{
 					Amount: 1,
 				},
 			},
-			NumSpaces:  3,
+			NumSpaces:  2,
 			MinPlayers: 2,
 		},
 	},
@@ -91,7 +91,7 @@ var locationSpecs = []blic.LocationSpec{
 
 	// Blue
 	{
-		Name: "stokeontrent",
+		Name: "stoke-on-trent",
 		IndustrySpaces: []blic.IndustrySpaceSpec{
 			{Types: []blic.IndustryType{blic.IndustryTypeManufacturer}},
 			{Types: []blic.IndustryType{blic.IndustryTypeCottonMill, blic.IndustryTypeManufacturer}},
@@ -154,7 +154,7 @@ var locationSpecs = []blic.LocationSpec{
 		},
 	},
 	{
-		Name: "burtonupontrent",
+		Name: "burton-upon-trent",
 		IndustrySpaces: []blic.IndustrySpaceSpec{
 			{Types: []blic.IndustryType{blic.IndustryTypeManufacturer, blic.IndustryTypeCoalMine}},
 			{Types: []blic.IndustryType{blic.IndustryTypeBrewery}},

@@ -72,7 +72,7 @@ var railEraConnectionSpecs = []blic.ConnectionSpec{
 	{LocationNames: []string{"leek", "belper"}},
 	{LocationNames: []string{"stone", "uttoxeter"}},
 	{LocationNames: []string{"uttoxeter", "derby"}},
-	{LocationNames: []string{"cannock", "burtonupontrent"}},
+	{LocationNames: []string{"cannock", "burton-upon-trent"}},
 	{LocationNames: []string{"walsall", "tamworth"}},
 	{LocationNames: []string{"nuneaton", "birmingham"}},
 	{LocationNames: []string{"nuneaton", "coventry"}},
