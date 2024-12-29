@@ -181,9 +181,11 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		GameSpecName:    s.Name,
 		GameSpecVersion: s.Version,
 
-		Deck:      deck,
-		Locations: locations,
-		Players:   players,
+		Deck:                deck,
+		Locations:           locations,
+		CanalEraConnections: canalEraConnections,
+		RailEraConnections:  railEraConnections,
+		Players:             players,
 
 		NumWildLocationCards: s.NumWildLocationCards,
 		NumWildIndustryCards: s.NumWildIndustryCards,
