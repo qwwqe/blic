@@ -3,6 +3,8 @@ package standard
 import (
 	"fmt"
 	"testing"
+
+	"github.com/qwwqe/blic"
 )
 
 func TestCards(t *testing.T) {
@@ -67,6 +69,33 @@ func TestMerchantTiles(t *testing.T) {
 
 			if count != testCase.tileCount {
 				t.Errorf("Expected %d tiles but got %d", testCase.tileCount, count)
+			}
+		})
+	}
+}
+
+func TestConnections(t *testing.T) {
+	cases := []struct {
+		era   blic.Era
+		specs []blic.ConnectionSpec
+		count int
+	}{
+		{blic.EraCanal, canalEraConnectionSpecs, 32},
+		{blic.EraRail, railEraConnectionSpecs, 39},
+	}
+
+	for _, testCase := range cases {
+		t.Run(fmt.Sprintf("%v era connections", testCase.era), func(t *testing.T) {
+			count := 0
+			for _, spec := range testCase.specs {
+				connection := spec.Build()
+				if len(connection.LocationNames) > 0 {
+					count++
+				}
+			}
+
+			if count != testCase.count {
+				t.Errorf("Expected %d connections but got %d", testCase.count, count)
 			}
 		})
 	}
