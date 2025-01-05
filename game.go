@@ -40,8 +40,13 @@ type Game struct {
 	Phase       GamePhase
 }
 
-// TODO: Reevaluate this
+/**
+ * HandleGameCreatedEvent handles the event corresponding to the start of a game.
+ * Calling this method will effectively clear the Game referenced by the pointer receiver.
+ */
 func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) *Game {
+	*g = Game{}
+
 	g.Id = e.Id
 	g.Events = []Event{e}
 
