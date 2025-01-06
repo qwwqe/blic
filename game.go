@@ -13,10 +13,6 @@ const (
 	GamePhaseAction GamePhase = "action"
 )
 
-const startingCoalInMarket = 13
-const startingIronInMarket = 8
-const startingWildCards = 4
-
 type Game struct {
 	Id     string
 	Events []Event
@@ -55,16 +51,20 @@ func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) *Game {
 	g.CanalEraConnections = CloneSlice(e.CanalEraConnections)
 	g.RailEraConnections = CloneSlice(e.RailEraConnections)
 
-	g.CoalInMarket = startingCoalInMarket
-	g.IronInMarket = startingIronInMarket
+	g.CoalInMarket = e.InitialCoalInMarket
+	g.IronInMarket = e.InitialIronInMarket
 
 	g.Era = EraCanal
 
 	g.Deck = CloneSlice(e.Deck)
-	g.WildLocationCards = make([]Card, 0, startingWildCards)
-	g.WildIndustryCards = make([]Card, 0, startingWildCards)
-	for i := 0; i < startingWildCards; i++ {
+
+	g.WildLocationCards = make([]Card, 0, e.NumWildLocationCards)
+	for i := 0; i < e.NumWildLocationCards; i++ {
 		g.WildLocationCards = append(g.WildLocationCards, Card{Type: CardTypeWildLocation})
+	}
+
+	g.WildIndustryCards = make([]Card, 0, e.NumWildIndustryCards)
+	for i := 0; i < e.NumWildIndustryCards; i++ {
 		g.WildIndustryCards = append(g.WildIndustryCards, Card{Type: CardTypeWildIndustry})
 	}
 
