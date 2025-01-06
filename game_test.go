@@ -7,7 +7,7 @@ import (
 
 func TestHandleGameCreatedEvent(t *testing.T) {
 	t.Run("records event in store", func(t *testing.T) {
-		e := GameCreatedEvent{Id: "test"}
+		e := GameCreatedEvent{GameId: "test"}
 		game := Game{}
 		game.HandleGameCreatedEvent(e)
 
@@ -17,7 +17,7 @@ func TestHandleGameCreatedEvent(t *testing.T) {
 	})
 
 	t.Run("clears existing events in store", func(t *testing.T) {
-		e := GameCreatedEvent{Id: "test"}
+		e := GameCreatedEvent{GameId: "test"}
 		game := Game{
 			Events: []Event{GameCreatedEvent{}, GameCreatedEvent{}},
 		}
@@ -27,4 +27,5 @@ func TestHandleGameCreatedEvent(t *testing.T) {
 			t.Errorf("expected %v but got %v", []Event{e}, game.Events)
 		}
 	})
+
 }

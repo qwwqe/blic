@@ -86,9 +86,9 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 
 	game := Game{}
 	game.HandleGameCreatedEvent(GameCreatedEvent{
-		Id:   uuid.NewString(),
 		Type: EventTypeGameCreated,
 
+		GameId:          uuid.NewString(),
 		GameSpecName:    s.Name,
 		GameSpecVersion: s.Version,
 

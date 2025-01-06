@@ -47,7 +47,7 @@ type Game struct {
 func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) *Game {
 	*g = Game{}
 
-	g.Id = e.Id
+	g.Id = e.GameId
 	g.Events = []Event{e}
 
 	g.Players = CloneSlice(g.Players)

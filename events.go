@@ -10,9 +10,9 @@ const (
 type Event interface{}
 
 type GameCreatedEvent struct {
-	Id   string
 	Type EventType
 
+	GameId          string
 	GameSpecName    string
 	GameSpecVersion string
 
