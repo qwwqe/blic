@@ -47,4 +47,34 @@ func TestHandleGameCreatedEvent(t *testing.T) {
 			t.Errorf("expected %v but got %v", e.NumWildIndustryCards, len(game.WildIndustryCards))
 		}
 	})
+
+	t.Run("initializes starting player index", func(t *testing.T) {
+		e := GameCreatedEvent{}
+		game := Game{}
+		game.HandleGameCreatedEvent(e)
+
+		if game.PlayerIndex != 0 {
+			t.Errorf("expected %v but got %v", 0, game.PlayerIndex)
+		}
+	})
+
+	t.Run("initializes starting round", func(t *testing.T) {
+		e := GameCreatedEvent{}
+		game := Game{}
+		game.HandleGameCreatedEvent(e)
+
+		if game.Round != 0 {
+			t.Errorf("expected %v but got %v", 0, game.Round)
+		}
+	})
+
+	t.Run("initializes starting phase", func(t *testing.T) {
+		e := GameCreatedEvent{}
+		game := Game{}
+		game.HandleGameCreatedEvent(e)
+
+		if game.Phase != GamePhaseAction {
+			t.Errorf("expected %v but got %v", 0, GamePhaseAction)
+		}
+	})
 }
