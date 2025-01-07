@@ -25,6 +25,7 @@ type Game struct {
 	// TODO: Consider whether settings like this should be encapsulated
 	// in a config object or something.
 	LoanAmount int
+	HandSize   int
 
 	CoalInMarket int
 	IronInMarket int

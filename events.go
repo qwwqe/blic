@@ -29,6 +29,7 @@ type GameCreatedEvent struct {
 	InitialIronInMarket int
 
 	LoanAmount int
+	HandSize   int
 }
 
 var _ Event = (*GameCreatedEvent)(nil)

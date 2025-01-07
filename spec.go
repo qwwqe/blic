@@ -107,6 +107,7 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 		InitialIronInMarket: s.InitialIronInMarket,
 
 		LoanAmount: s.LoanAmount,
+		HandSize:   s.HandSize,
 	})
 
 	return game, nil
