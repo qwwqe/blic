@@ -42,6 +42,8 @@ type GameSpec struct {
 	InitialCoalInMarket int
 	InitialIronInMarket int
 
+	LoanAmount int
+
 	StartingMoney       int
 	StartingIncomeSpace int
 	HandSize            int
@@ -103,6 +105,8 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 
 		InitialCoalInMarket: s.InitialCoalInMarket,
 		InitialIronInMarket: s.InitialIronInMarket,
+
+		LoanAmount: s.LoanAmount,
 	})
 
 	return game, nil

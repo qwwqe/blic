@@ -18,6 +18,8 @@ var GameSpec = blic.GameSpec{
 	InitialCoalInMarket: 13,
 	InitialIronInMarket: 8,
 
+	LoanAmount: 30,
+
 	StartingMoney:       17,
 	StartingIncomeSpace: 10,
 	HandSize:            8,

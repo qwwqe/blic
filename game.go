@@ -22,6 +22,10 @@ type Game struct {
 	CanalEraConnections []Connection
 	RailEraConnections  []Connection
 
+	// TODO: Consider whether settings like this should be encapsulated
+	// in a config object or something.
+	LoanAmount int
+
 	CoalInMarket int
 	IronInMarket int
 
