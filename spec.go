@@ -321,6 +321,7 @@ func (s *CardSpec) Build(playerCount int) []Card {
 
 	for i := 0; i < s.AmountByPlayerCount[playerCount]; i++ {
 		cards = append(cards, Card{
+			Id: uuid.NewString(),
 			// NOTE: Depending on how many games are expected to be processed
 			// simultaneously, it may be worthwhile not cloning resources
 			// that are in principle expected to be immutable.

@@ -10,6 +10,7 @@ const (
 )
 
 type Card struct {
+	Id            string
 	IndustryTypes []IndustryType
 	LocationName  string
 	Type          CardType
