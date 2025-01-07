@@ -18,6 +18,7 @@ var (
 	ErrTooFewMerchantTiles   = errors.New("Too few merchant tiles")
 	ErrTooManyMerchantTiles  = errors.New("Too many merchant tiles")
 	ErrIncorrectIndustryType = errors.New("Incorrect industry type")
+	ErrDuplicatePlayerId     = errors.New("Duplicate player id")
 )
 
 // TODO: Try generalizing the Spec interface to gracefully accomodate
@@ -50,17 +51,17 @@ type GameSpec struct {
 	LinksPerPlayer      int
 }
 
-func (s *GameSpec) Build(playerCount int) (Game, error) {
-	if playerCount < s.MinPlayerCount || playerCount > s.MaxPlayerCount {
-		return Game{}, fmt.Errorf("%w: %d", ErrInvalidPlayerCount, playerCount)
+func (s *GameSpec) Build(playerIds []string) (Game, error) {
+	if len(playerIds) < s.MinPlayerCount || len(playerIds) > s.MaxPlayerCount {
+		return Game{}, fmt.Errorf("%w: %d", ErrInvalidPlayerCount, len(playerIds))
 	}
 
-	deck, err := buildDeck(*s, playerCount)
+	deck, err := buildDeck(*s, len(playerIds))
 	if err != nil {
 		return Game{}, err
 	}
 
-	locations, err := buildLocations(*s, playerCount)
+	locations, err := buildLocations(*s, len(playerIds))
 	if err != nil {
 		return Game{}, err
 	}
@@ -76,12 +77,12 @@ func (s *GameSpec) Build(playerCount int) (Game, error) {
 	}
 
 	// TODO: Return merchant tiles and define a separate function for their "placement"
-	if err := buildMerchants(*s, playerCount, locations); err != nil {
+	if err := buildMerchants(*s, len(playerIds), locations); err != nil {
 		return Game{}, err
 	}
 
 	// TODO: Define a separate function for drawing of cards from the deck?
-	players, err := buildPlayers(*s, playerCount, &deck)
+	players, err := buildPlayers(*s, playerIds, &deck)
 	if err != nil {
 		return Game{}, err
 	}
@@ -277,12 +278,19 @@ func buildMerchants(spec GameSpec, numPlayers int, locations []Location) error {
 	return nil
 }
 
-func buildPlayers(spec GameSpec, numPlayers int, deck *[]Card) ([]Player, error) {
+func buildPlayers(spec GameSpec, playerIds []string, deck *[]Card) ([]Player, error) {
 	players := []Player{}
 
-	for range numPlayers {
+	usedPlayerIds := map[string]bool{}
+
+	for _, playerId := range playerIds {
+		if usedPlayerIds[playerId] {
+			return nil, fmt.Errorf("%w: %s", ErrDuplicatePlayerId, playerId)
+		}
+		usedPlayerIds[playerId] = true
+
 		player := Player{
-			Id: uuid.NewString(),
+			Id: playerId,
 
 			Mat:            spec.PlayerMatSpec.Build(),
 			Money:          spec.StartingMoney,

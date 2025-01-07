@@ -103,9 +103,10 @@ func TestConnections(t *testing.T) {
 
 func TestGame(t *testing.T) {
 	minPlayers, maxPlayers := 2, 4
+	playerIds := []string{"a", "b", "c", "d"}
 	for numPlayers := minPlayers; numPlayers <= maxPlayers; numPlayers++ {
 		t.Run(fmt.Sprintf("Game creation for %d players", numPlayers), func(t *testing.T) {
-			_, err := GameSpec.Build(numPlayers)
+			_, err := GameSpec.Build(playerIds[0:numPlayers])
 			if err != nil {
 				t.Errorf("Received error when building game from spec: %v", err)
 			}
