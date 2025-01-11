@@ -1,11 +1,31 @@
 package blic
 
+import "fmt"
+
 type Era string
 
 const (
 	EraCanal Era = "canal"
 	EraRail  Era = "rail"
 )
+
+type HandleEventError struct {
+	GameId     string
+	EventIndex int
+	Reason     string
+}
+
+func (e HandleEventError) Error() string {
+	return fmt.Sprintf("Error handling event %d for game %s: %s", e.EventIndex, e.GameId, e.Reason)
+}
+
+func NewHandleEventError(gameId string, eventIndex int, reason string) HandleEventError {
+	return HandleEventError{
+		GameId:     gameId,
+		EventIndex: eventIndex,
+		Reason:     reason,
+	}
+}
 
 type GamePhase string
 
@@ -78,4 +98,60 @@ func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) *Game {
 	g.Phase = GamePhaseAction
 
 	return g
+}
+
+func (g *Game) HandleLoanActionTakenEvent(e LoanActionTakenEvent) error {
+	/** action boilerplate */
+	playerIndex := -1
+	for index, player := range g.Players {
+		if player.Id == e.PlayerId {
+			playerIndex = index
+			break
+		}
+	}
+
+	if playerIndex == -1 {
+		return NewHandleEventError(
+			g.Id,
+			len(g.Events),
+			fmt.Sprintf("Player with id %s not found", e.PlayerId),
+		)
+	}
+
+	player := &g.Players[playerIndex]
+
+	cardIndex := -1
+	for index, card := range player.Cards {
+		if card.Id == e.DiscardedCardId {
+			cardIndex = index
+			break
+		}
+	}
+
+	if cardIndex == -1 {
+		return NewHandleEventError(
+			g.Id,
+			len(g.Events),
+			fmt.Sprintf("Card with id %s not found", e.DiscardedCardId),
+		)
+	}
+
+	player.Discards = append(player.Discards, player.Cards[cardIndex])
+
+	for i := cardIndex; i < len(player.Cards)-1; i++ {
+		player.Cards[i] = player.Cards[i+1]
+	}
+
+	player.Cards = player.Cards[:len(player.Cards)-1]
+
+	/** end boilerplate */
+
+	player.Money += g.LoanAmount
+
+	// TODO: Define income track in spec
+	// TODO: Define minimum income level
+
+	g.Events = append(g.Events, e)
+
+	return nil
 }
