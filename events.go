@@ -3,7 +3,8 @@ package blic
 type EventType string
 
 const (
-	EventTypeGameCreated EventType = "gamecreated"
+	EventTypeGameCreated     EventType = "gamecreated"
+	EventTypeLoanActionTaken EventType = "loanactiontaken"
 )
 
 // TODO: Think about what should appear here and whether it needs to exist at all.
@@ -30,6 +31,13 @@ type GameCreatedEvent struct {
 
 	LoanAmount int
 	HandSize   int
+}
+
+type LoanActionTakenEvent struct {
+	Type EventType
+
+	PlayerId        string
+	DiscardedCardId string
 }
 
 var _ Event = (*GameCreatedEvent)(nil)
