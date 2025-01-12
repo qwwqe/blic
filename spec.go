@@ -33,6 +33,7 @@ type GameSpec struct {
 	RailEraConnectionSpecs  []ConnectionSpec
 	MerchantTileSpecs       []MerchantTileSpec
 	PlayerMatSpec           PlayerMatSpec
+	ProgressTrackSpec       ProgressTrackSpec
 
 	NumWildLocationCards int
 	NumWildIndustryCards int
@@ -491,4 +492,14 @@ func (s *PlayerMatSpec) Build() PlayerMat {
 	}
 
 	return mat
+}
+
+type ProgressTrackSpec struct {
+	StartingIncomeLevel int
+	GraduationSpecs     []ProgressTrackGraduationSpec
+}
+
+type ProgressTrackGraduationSpec struct {
+	SpacesPerIncomeLevel int
+	NumIncomeLevels      int
 }
