@@ -108,7 +108,7 @@ func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) *Game {
 }
 
 func (g *Game) HandleLoanActionTakenEvent(e LoanActionTakenEvent) error {
-	/** action boilerplate */
+	/** action validation boilerplate */
 	playerIndex := -1
 	for index, player := range g.Players {
 		if player.Id == e.PlayerId {
@@ -143,6 +143,19 @@ func (g *Game) HandleLoanActionTakenEvent(e LoanActionTakenEvent) error {
 		)
 	}
 
+	/** end boilerplate*/
+
+	newIncomeSpace := calculateDeductedIncomeSpace(g.IncomeTrack, player.IncomeSpace, g.LoanIncomeLevelPenalty)
+	if newIncomeSpace < 0 {
+		return NewHandleEventError(
+			g.Id,
+			len(g.Events),
+			fmt.Sprintf("Negative income space index"),
+		)
+	}
+
+	/** action discard boilerplate */
+
 	if player.Cards[cardIndex].Type == CardTypeWildIndustry {
 		g.WildIndustryCards = append(g.WildIndustryCards, player.Cards[cardIndex])
 	} else if player.Cards[cardIndex].Type == CardTypeWildLocation {
@@ -159,10 +172,8 @@ func (g *Game) HandleLoanActionTakenEvent(e LoanActionTakenEvent) error {
 
 	/** end boilerplate */
 
+	player.IncomeSpace = newIncomeSpace
 	player.Money += g.LoanAmount
-
-	// TODO: Define income track in spec
-	// TODO: Define minimum income level
 
 	g.Events = append(g.Events, e)
 
