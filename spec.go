@@ -33,7 +33,7 @@ type GameSpec struct {
 	RailEraConnectionSpecs  []ConnectionSpec
 	MerchantTileSpecs       []MerchantTileSpec
 	PlayerMatSpec           PlayerMatSpec
-	ProgressTrackSpec       ProgressTrackSpec
+	IncomeTrackSpec         IncomeTrackSpec
 
 	NumWildLocationCards int
 	NumWildIndustryCards int
@@ -88,6 +88,8 @@ func (s *GameSpec) Build(playerIds []string) (Game, error) {
 		return Game{}, err
 	}
 
+	incomeTrack := s.IncomeTrackSpec.Build()
+
 	game := Game{}
 	game.HandleGameCreatedEvent(GameCreatedEvent{
 		Type: EventTypeGameCreated,
@@ -101,6 +103,7 @@ func (s *GameSpec) Build(playerIds []string) (Game, error) {
 		CanalEraConnections: canalEraConnections,
 		RailEraConnections:  railEraConnections,
 		Players:             players,
+		IncomeTrack:         incomeTrack,
 
 		NumWildLocationCards: s.NumWildLocationCards,
 		NumWildIndustryCards: s.NumWildIndustryCards,
@@ -494,12 +497,28 @@ func (s *PlayerMatSpec) Build() PlayerMat {
 	return mat
 }
 
-type ProgressTrackSpec struct {
+type IncomeTrackSpec struct {
 	StartingIncomeLevel int
-	GraduationSpecs     []ProgressTrackGraduationSpec
+	GraduationSpecs     []IncomeTrackGraduationSpec
 }
 
-type ProgressTrackGraduationSpec struct {
+type IncomeTrackGraduationSpec struct {
 	SpacesPerIncomeLevel int
 	NumIncomeLevels      int
+}
+
+func (s IncomeTrackSpec) Build() []int {
+	track := []int{}
+
+	incomeLevel := s.StartingIncomeLevel
+	for _, graduation := range s.GraduationSpecs {
+		for range graduation.NumIncomeLevels {
+			for range graduation.SpacesPerIncomeLevel {
+				track = append(track, incomeLevel)
+			}
+			incomeLevel++
+		}
+	}
+
+	return track
 }

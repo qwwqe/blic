@@ -101,6 +101,28 @@ func TestConnections(t *testing.T) {
 	}
 }
 
+func TestIncomeTrack(t *testing.T) {
+	t.Run("Income spaces", func(t *testing.T) {
+		incomeTrack := incomeTrackSpec.Build()
+		if len(incomeTrack) != 100 {
+			t.Errorf("Expected 100 income spaces but got %d", len(incomeTrack))
+		}
+	})
+
+	t.Run("Income levels", func(t *testing.T) {
+		incomeTrack := incomeTrackSpec.Build()
+		levels := map[int]bool{}
+
+		for _, level := range incomeTrack {
+			levels[level] = true
+		}
+
+		if len(levels) != 41 {
+			t.Errorf("Expected 41 income levels but got %d", len(levels))
+		}
+	})
+}
+
 func TestGame(t *testing.T) {
 	minPlayers, maxPlayers := 2, 4
 	playerIds := []string{"a", "b", "c", "d"}

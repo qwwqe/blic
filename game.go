@@ -55,6 +55,7 @@ type Game struct {
 	Deck              []Card
 	WildLocationCards []Card
 	WildIndustryCards []Card
+	IncomeTrack       []int
 
 	PlayerIndex int
 	Round       int
@@ -82,6 +83,9 @@ func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) *Game {
 	g.Era = EraCanal
 
 	g.Deck = CloneSlice(e.Deck)
+
+	g.IncomeTrack = make([]int, len(e.IncomeTrack))
+	copy(g.IncomeTrack, e.IncomeTrack)
 
 	g.WildLocationCards = make([]Card, 0, e.NumWildLocationCards)
 	for i := 0; i < e.NumWildLocationCards; i++ {

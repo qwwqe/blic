@@ -27,6 +27,7 @@ var GameSpec = blic.GameSpec{
 
 	CardSpecs:               cardSpecs,
 	PlayerMatSpec:           playerMatSpec,
+	IncomeTrackSpec:         incomeTrackSpec,
 	MerchantTileSpecs:       merchantTileSpecs,
 	LocationSpecs:           locationSpecs,
 	CanalEraConnectionSpecs: canalEraConnectionSpecs,

@@ -22,6 +22,7 @@ type GameCreatedEvent struct {
 	CanalEraConnections []Connection
 	RailEraConnections  []Connection
 	Players             []Player
+	IncomeTrack         []int
 
 	NumWildLocationCards int
 	NumWildIndustryCards int
