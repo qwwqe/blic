@@ -46,10 +46,11 @@ type GameSpec struct {
 
 	LoanAmount int
 
-	StartingMoney       int
-	StartingIncomeSpace int
-	HandSize            int
-	LinksPerPlayer      int
+	StartingMoney          int
+	StartingIncomeSpace    int
+	LoanIncomeLevelPenalty int
+	HandSize               int
+	LinksPerPlayer         int
 }
 
 func (s *GameSpec) Build(playerIds []string) (Game, error) {
@@ -111,8 +112,9 @@ func (s *GameSpec) Build(playerIds []string) (Game, error) {
 		InitialCoalInMarket: s.InitialCoalInMarket,
 		InitialIronInMarket: s.InitialIronInMarket,
 
-		LoanAmount: s.LoanAmount,
-		HandSize:   s.HandSize,
+		LoanAmount:             s.LoanAmount,
+		LoanIncomeLevelPenalty: s.LoanIncomeLevelPenalty,
+		HandSize:               s.HandSize,
 	})
 
 	return game, nil

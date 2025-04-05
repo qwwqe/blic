@@ -22,8 +22,9 @@ var GameSpec = blic.GameSpec{
 	HandSize:       8,
 	LinksPerPlayer: 14,
 
-	StartingMoney:       17,
-	StartingIncomeSpace: 10,
+	StartingMoney:          17,
+	StartingIncomeSpace:    10,
+	LoanIncomeLevelPenalty: 3,
 
 	CardSpecs:               cardSpecs,
 	PlayerMatSpec:           playerMatSpec,

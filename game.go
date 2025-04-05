@@ -44,8 +44,9 @@ type Game struct {
 
 	// TODO: Consider whether settings like this should be encapsulated
 	// in a config object or something.
-	LoanAmount int
-	HandSize   int
+	LoanAmount             int
+	HandSize               int
+	LoanIncomeLevelPenalty int
 
 	CoalInMarket int
 	IronInMarket int
@@ -86,6 +87,8 @@ func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) *Game {
 
 	g.IncomeTrack = make([]int, len(e.IncomeTrack))
 	copy(g.IncomeTrack, e.IncomeTrack)
+
+	g.LoanIncomeLevelPenalty = e.LoanIncomeLevelPenalty
 
 	g.WildLocationCards = make([]Card, 0, e.NumWildLocationCards)
 	for i := 0; i < e.NumWildLocationCards; i++ {
