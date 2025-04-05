@@ -165,3 +165,24 @@ func (g *Game) HandleLoanActionTakenEvent(e LoanActionTakenEvent) error {
 
 	return nil
 }
+
+func calculateDeductedIncomeSpace(incomeTrack []int, currentIncomeSpace int, deductedLevels int) int {
+	newIncomeSpace := -1
+	incomeLevelsToDeduct := deductedLevels
+	lastIncomeLevel := incomeTrack[currentIncomeSpace]
+
+	for i := currentIncomeSpace - 1; i >= 0; i-- {
+		if incomeTrack[i] == lastIncomeLevel {
+			continue
+		}
+
+		lastIncomeLevel = incomeTrack[i]
+		incomeLevelsToDeduct--
+		if incomeLevelsToDeduct == 0 {
+			newIncomeSpace = i
+			break
+		}
+	}
+
+	return newIncomeSpace
+}

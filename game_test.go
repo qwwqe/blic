@@ -78,3 +78,25 @@ func TestHandleGameCreatedEvent(t *testing.T) {
 		}
 	})
 }
+
+func TestCalculateDeductedIncomeSpace(t *testing.T) {
+	cases := []struct {
+		incomeTrack         []int
+		currentIncomeSpace  int
+		deductedLevels      int
+		expectedIncomeSpace int
+	}{
+		{[]int{-10, -9, -8, -7}, 3, 3, 0},
+		{[]int{-10, -9, -8}, 2, 3, -1},
+		{[]int{1, 1, 2, 2, 3, 3, 3, 4, 4, 4}, 7, 3, 1},
+		{[]int{1, 1, 2, 2, 3, 3, 3, 4, 4, 4}, 8, 3, 1},
+		{[]int{1, 1, 1, 2, 3, 3, 4, 5, 5, 5, 6}, 9, 3, 3},
+	}
+
+	for _, testCase := range cases {
+		newIncomeSpace := calculateDeductedIncomeSpace(testCase.incomeTrack, testCase.currentIncomeSpace, testCase.deductedLevels)
+		if newIncomeSpace != testCase.expectedIncomeSpace {
+			t.Errorf("expected %v but got %v", testCase.expectedIncomeSpace, newIncomeSpace)
+		}
+	}
+}
