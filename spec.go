@@ -93,7 +93,7 @@ func (s *GameSpec) Build(playerIds []string) (Game, error) {
 
 	game := Game{}
 	game.HandleGameCreatedEvent(GameCreatedEvent{
-		Type: EventTypeGameCreated,
+		Type: GameCreatedEventType,
 
 		GameId:          uuid.NewString(),
 		GameSpecName:    s.Name,

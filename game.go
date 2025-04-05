@@ -1,6 +1,9 @@
 package blic
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type Era string
 
@@ -26,6 +29,13 @@ func NewHandleEventError(gameId string, eventIndex int, reason string) HandleEve
 		Reason:     reason,
 	}
 }
+
+var (
+	InvalidPhaseActionErr    = errors.New("Action taken outside of action phase")
+	OutOfTurnErr             = errors.New("Action taken out of turn")
+	ActionPlayerNotFoundErr  = errors.New("Action player not found")
+	ActionDiscardNotFoundErr = errors.New("Action disCard not found")
+)
 
 type GamePhase string
 
@@ -107,43 +117,47 @@ func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) *Game {
 	return g
 }
 
-func (g *Game) HandleLoanActionTakenEvent(e LoanActionTakenEvent) error {
-	/** action validation boilerplate */
-	playerIndex := -1
-	for index, player := range g.Players {
-		if player.Id == e.PlayerId {
-			playerIndex = index
-			break
-		}
+// TODO: Tests
+func (g *Game) TakeLoanAction(playerId, discardedCardId string) error {
+	if g.Phase != GamePhaseAction {
+		return InvalidPhaseActionErr
 	}
 
-	if playerIndex == -1 {
-		return NewHandleEventError(
-			g.Id,
-			len(g.Events),
-			fmt.Sprintf("Player with id %s not found", e.PlayerId),
-		)
+	if g.Players[g.PlayerIndex].Id != playerId {
+		return OutOfTurnErr
 	}
 
-	player := &g.Players[playerIndex]
+	// TODO: Handle action sub-phases (choices within each phase)
 
-	cardIndex := -1
-	for index, card := range player.Cards {
-		if card.Id == e.DiscardedCardId {
-			cardIndex = index
-			break
-		}
+	player, err := getEventPlayer(g, playerId)
+	if err != nil {
+		return ActionPlayerNotFoundErr
 	}
 
-	if cardIndex == -1 {
-		return NewHandleEventError(
-			g.Id,
-			len(g.Events),
-			fmt.Sprintf("Card with id %s not found", e.DiscardedCardId),
-		)
+	if _, err := getEventCardIndex(g, player, discardedCardId); err != nil {
+		return ActionDiscardNotFoundErr
 	}
 
-	/** end boilerplate*/
+	event := LoanActionTakenEvent{
+		Type:            LoanActionTakenEventType,
+		PlayerId:        playerId,
+		DiscardedCardId: discardedCardId,
+	}
+
+	return g.handleLoanActionTakenEvent(event)
+}
+
+// TODO: Tests
+func (g *Game) handleLoanActionTakenEvent(e LoanActionTakenEvent) error {
+	player, err := getEventPlayer(g, e.PlayerId)
+	if err != nil {
+		return err
+	}
+
+	cardIndex, err := getEventCardIndex(g, player, e.DiscardedCardId)
+	if err != nil {
+		return err
+	}
 
 	newIncomeSpace := calculateDeductedIncomeSpace(g.IncomeTrack, player.IncomeSpace, g.LoanIncomeLevelPenalty)
 	if newIncomeSpace < 0 {
@@ -154,12 +168,61 @@ func (g *Game) HandleLoanActionTakenEvent(e LoanActionTakenEvent) error {
 		)
 	}
 
-	/** action discard boilerplate */
+	processEventDiscard(g, player, cardIndex)
 
+	player.IncomeSpace = newIncomeSpace
+	player.Money += g.LoanAmount
+
+	g.Events = append(g.Events, e)
+
+	return nil
+}
+
+func getEventPlayer(g *Game, playerId string) (*Player, error) {
+	playerIndex := -1
+	for index, player := range g.Players {
+		if player.Id == playerId {
+			playerIndex = index
+			break
+		}
+	}
+
+	if playerIndex == -1 {
+		return nil, NewHandleEventError(
+			g.Id,
+			len(g.Events),
+			fmt.Sprintf("Player with id %s not found", playerId),
+		)
+	}
+
+	return &g.Players[playerIndex], nil
+}
+
+func getEventCardIndex(game *Game, player *Player, cardId string) (int, error) {
+	cardIndex := -1
+	for index, card := range player.Cards {
+		if card.Id == cardId {
+			cardIndex = index
+			break
+		}
+	}
+
+	if cardIndex == -1 {
+		return -1, NewHandleEventError(
+			game.Id,
+			len(game.Events),
+			fmt.Sprintf("Card with id %s not found", cardId),
+		)
+	}
+
+	return cardIndex, nil
+}
+
+func processEventDiscard(game *Game, player *Player, cardIndex int) {
 	if player.Cards[cardIndex].Type == CardTypeWildIndustry {
-		g.WildIndustryCards = append(g.WildIndustryCards, player.Cards[cardIndex])
+		game.WildIndustryCards = append(game.WildIndustryCards, player.Cards[cardIndex])
 	} else if player.Cards[cardIndex].Type == CardTypeWildLocation {
-		g.WildLocationCards = append(g.WildLocationCards, player.Cards[cardIndex])
+		game.WildLocationCards = append(game.WildLocationCards, player.Cards[cardIndex])
 	} else {
 		player.Discards = append(player.Discards, player.Cards[cardIndex])
 	}
@@ -169,15 +232,6 @@ func (g *Game) HandleLoanActionTakenEvent(e LoanActionTakenEvent) error {
 	}
 
 	player.Cards = player.Cards[:len(player.Cards)-1]
-
-	/** end boilerplate */
-
-	player.IncomeSpace = newIncomeSpace
-	player.Money += g.LoanAmount
-
-	g.Events = append(g.Events, e)
-
-	return nil
 }
 
 func calculateDeductedIncomeSpace(incomeTrack []int, currentIncomeSpace int, deductedLevels int) int {

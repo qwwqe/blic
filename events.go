@@ -3,8 +3,8 @@ package blic
 type EventType string
 
 const (
-	EventTypeGameCreated     EventType = "gamecreated"
-	EventTypeLoanActionTaken EventType = "loanactiontaken"
+	GameCreatedEventType     EventType = "gamecreated"
+	LoanActionTakenEventType EventType = "loanactiontaken"
 )
 
 // TODO: Think about what should appear here and whether it needs to exist at all.
