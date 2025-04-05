@@ -140,7 +140,13 @@ func (g *Game) HandleLoanActionTakenEvent(e LoanActionTakenEvent) error {
 		)
 	}
 
-	player.Discards = append(player.Discards, player.Cards[cardIndex])
+	if player.Cards[cardIndex].Type == CardTypeWildIndustry {
+		g.WildIndustryCards = append(g.WildIndustryCards, player.Cards[cardIndex])
+	} else if player.Cards[cardIndex].Type == CardTypeWildLocation {
+		g.WildLocationCards = append(g.WildLocationCards, player.Cards[cardIndex])
+	} else {
+		player.Discards = append(player.Discards, player.Cards[cardIndex])
+	}
 
 	for i := cardIndex; i < len(player.Cards)-1; i++ {
 		player.Cards[i] = player.Cards[i+1]
