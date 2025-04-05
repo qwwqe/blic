@@ -91,12 +91,12 @@ func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) *Game {
 	g.LoanIncomeLevelPenalty = e.LoanIncomeLevelPenalty
 
 	g.WildLocationCards = make([]Card, 0, e.NumWildLocationCards)
-	for i := 0; i < e.NumWildLocationCards; i++ {
+	for range e.NumWildLocationCards {
 		g.WildLocationCards = append(g.WildLocationCards, Card{Type: CardTypeWildLocation})
 	}
 
 	g.WildIndustryCards = make([]Card, 0, e.NumWildIndustryCards)
-	for i := 0; i < e.NumWildIndustryCards; i++ {
+	for range e.NumWildIndustryCards {
 		g.WildIndustryCards = append(g.WildIndustryCards, Card{Type: CardTypeWildIndustry})
 	}
 

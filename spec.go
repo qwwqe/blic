@@ -266,7 +266,7 @@ func buildMerchants(spec GameSpec, numPlayers int, locations []Location) error {
 			continue
 		}
 
-		for j := 0; j < len(locations[i].Merchant.Spaces); j++ {
+		for j := range len(locations[i].Merchant.Spaces) {
 			if len(merchantTiles) == 0 {
 				fmt.Println(locations[i].Merchant.Spaces)
 				return ErrTooFewMerchantTiles
@@ -338,7 +338,7 @@ type CardSpec struct {
 func (s *CardSpec) Build(playerCount int) []Card {
 	cards := []Card{}
 
-	for i := 0; i < s.AmountByPlayerCount[playerCount]; i++ {
+	for range s.AmountByPlayerCount[playerCount] {
 		cards = append(cards, Card{
 			Id: uuid.NewString(),
 			// NOTE: Depending on how many games are expected to be processed
@@ -425,7 +425,7 @@ func (s *MerchantSpec) Build(playerCount int) *Merchant {
 	}
 
 	if playerCount >= s.MinPlayers {
-		for i := 0; i < s.NumSpaces; i++ {
+		for range s.NumSpaces {
 			merchant.Spaces = append(merchant.Spaces, MerchantSpace{})
 		}
 	}
