@@ -46,6 +46,8 @@ type GameSpec struct {
 
 	LoanAmount int
 
+	StartingActions        int
+	ActionsPerTurn         int
 	StartingMoney          int
 	StartingIncomeSpace    int
 	LoanIncomeLevelPenalty int
@@ -111,6 +113,8 @@ func (s *GameSpec) Build(playerIds []string) (Game, error) {
 
 		InitialCoalInMarket: s.InitialCoalInMarket,
 		InitialIronInMarket: s.InitialIronInMarket,
+
+		ActionsPerTurn: s.ActionsPerTurn,
 
 		LoanAmount:             s.LoanAmount,
 		LoanIncomeLevelPenalty: s.LoanIncomeLevelPenalty,
@@ -298,12 +302,13 @@ func buildPlayers(spec GameSpec, playerIds []string, deck *[]Card) ([]Player, er
 		player := Player{
 			Id: playerId,
 
-			Mat:            spec.PlayerMatSpec.Build(),
-			Money:          spec.StartingMoney,
-			SpentMoney:     0,
-			IncomeSpace:    spec.StartingIncomeSpace,
-			VictoryPoints:  0,
-			RemainingLinks: spec.LinksPerPlayer,
+			Mat:              spec.PlayerMatSpec.Build(),
+			Money:            spec.StartingMoney,
+			SpentMoney:       0,
+			IncomeSpace:      spec.StartingIncomeSpace,
+			VictoryPoints:    0,
+			RemainingLinks:   spec.LinksPerPlayer,
+			RemainingActions: spec.StartingActions,
 
 			Cards: make([]Card, 0, spec.HandSize),
 		}

@@ -35,6 +35,7 @@ var (
 	OutOfTurnErr             = errors.New("Action taken out of turn")
 	ActionPlayerNotFoundErr  = errors.New("Action player not found")
 	ActionDiscardNotFoundErr = errors.New("Action disCard not found")
+	NoRemainingActionsErr    = errors.New("No remaining actions")
 )
 
 type GamePhase string
@@ -57,6 +58,7 @@ type Game struct {
 	LoanAmount             int
 	HandSize               int
 	LoanIncomeLevelPenalty int
+	ActionsPerTurn         int
 
 	CoalInMarket int
 	IronInMarket int
@@ -100,6 +102,8 @@ func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) *Game {
 
 	g.LoanIncomeLevelPenalty = e.LoanIncomeLevelPenalty
 
+	g.ActionsPerTurn = e.ActionsPerTurn
+
 	g.WildLocationCards = make([]Card, 0, e.NumWildLocationCards)
 	for range e.NumWildLocationCards {
 		g.WildLocationCards = append(g.WildLocationCards, Card{Type: CardTypeWildLocation})
@@ -132,6 +136,10 @@ func (g *Game) TakeLoanAction(playerId, discardedCardId string) error {
 	player, err := getEventPlayer(g, playerId)
 	if err != nil {
 		return ActionPlayerNotFoundErr
+	}
+
+	if player.RemainingActions == 0 {
+		return NoRemainingActionsErr
 	}
 
 	if _, err := getEventCardIndex(g, player, discardedCardId); err != nil {
@@ -173,6 +181,11 @@ func (g *Game) handleLoanActionTakenEvent(e LoanActionTakenEvent) error {
 	player.IncomeSpace = newIncomeSpace
 	player.Money += g.LoanAmount
 
+	/** post-action boilerplate */
+
+	player.RemainingActions--
+
+	/** end boilerplate */
 	g.Events = append(g.Events, e)
 
 	return nil

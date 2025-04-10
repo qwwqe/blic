@@ -26,6 +26,9 @@ var GameSpec = blic.GameSpec{
 	StartingIncomeSpace:    10,
 	LoanIncomeLevelPenalty: 3,
 
+	StartingActions: 1,
+	ActionsPerTurn:  2,
+
 	CardSpecs:               cardSpecs,
 	PlayerMatSpec:           playerMatSpec,
 	IncomeTrackSpec:         incomeTrackSpec,

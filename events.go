@@ -30,6 +30,8 @@ type GameCreatedEvent struct {
 	InitialCoalInMarket int
 	InitialIronInMarket int
 
+	ActionsPerTurn int
+
 	LoanAmount             int
 	LoanIncomeLevelPenalty int
 	HandSize               int
