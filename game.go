@@ -34,7 +34,7 @@ var (
 	InvalidPhaseActionErr    = errors.New("Action taken outside of action phase")
 	OutOfTurnErr             = errors.New("Action taken out of turn")
 	ActionPlayerNotFoundErr  = errors.New("Action player not found")
-	ActionDiscardNotFoundErr = errors.New("Action disCard not found")
+	ActionDiscardNotFoundErr = errors.New("Action disdard not found")
 	NoRemainingActionsErr    = errors.New("No remaining actions")
 )
 
@@ -152,7 +152,30 @@ func (g *Game) TakeLoanAction(playerId, discardedCardId string) error {
 		DiscardedCardId: discardedCardId,
 	}
 
-	return g.handleLoanActionTakenEvent(event)
+	if err := g.handleLoanActionTakenEvent(event); err != nil {
+		return err
+	}
+
+	/** post-action boilerplate */
+
+	if player.RemainingActions == 0 {
+		event := TurnEndedEvent{
+			Type:     TurnEndedEventType,
+			PlayerId: player.Id,
+		}
+
+		if err = g.handleTurnEndedEvent(event); err != nil {
+			return err
+		}
+
+		// TODO: End of round
+
+		// TODO: End of era
+	}
+
+	/** end boilerplate*/
+
+	return nil
 }
 
 // TODO: Tests
@@ -186,6 +209,25 @@ func (g *Game) handleLoanActionTakenEvent(e LoanActionTakenEvent) error {
 	player.RemainingActions--
 
 	/** end boilerplate */
+
+	g.Events = append(g.Events, e)
+
+	return nil
+}
+
+func (g *Game) handleTurnEndedEvent(e TurnEndedEvent) error {
+	player, err := getEventPlayer(g, e.PlayerId)
+	if err != nil {
+		return err
+	}
+
+	for len(g.Deck) > 0 && len(player.Cards) < g.HandSize {
+		player.Cards = append(player.Cards, g.Deck[len(g.Deck)-1])
+		g.Deck = g.Deck[:len(g.Deck)-1]
+	}
+
+	player.RemainingActions = g.ActionsPerTurn
+
 	g.Events = append(g.Events, e)
 
 	return nil
