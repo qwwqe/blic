@@ -5,6 +5,7 @@ type EventType string
 const (
 	GameCreatedEventType     EventType = "gamecreated"
 	LoanActionTakenEventType EventType = "loanactiontaken"
+	PassActionTakenEventType EventType = "passactiontaken"
 	TurnEndedEventType       EventType = "turnended"
 )
 
@@ -39,6 +40,13 @@ type GameCreatedEvent struct {
 }
 
 type LoanActionTakenEvent struct {
+	Type EventType
+
+	PlayerId        string
+	DiscardedCardId string
+}
+
+type PassActionTakenEvent struct {
 	Type EventType
 
 	PlayerId        string

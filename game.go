@@ -200,6 +200,62 @@ func (g *Game) handleLoanActionTakenEvent(e LoanActionTakenEvent) error {
 	return nil
 }
 
+func (g *Game) TakePassAction(playerId, discardedCardId string) error {
+	if g.Phase != GamePhaseAction {
+		return InvalidPhaseActionErr
+	}
+
+	if g.Players[g.PlayerIndex].Id != playerId {
+		return OutOfTurnErr
+	}
+
+	player, err := getEventPlayer(g, playerId)
+	if err != nil {
+		return ActionPlayerNotFoundErr
+	}
+
+	if player.RemainingActions == 0 {
+		return NoRemainingActionsErr
+	}
+
+	if _, err := getEventCardIndex(g, player, discardedCardId); err != nil {
+		return ActionDiscardNotFoundErr
+	}
+
+	event := PassActionTakenEvent{
+		Type:            PassActionTakenEventType,
+		PlayerId:        playerId,
+		DiscardedCardId: discardedCardId,
+	}
+
+	if err := g.handlePassActionTakenEvent(event); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *Game) handlePassActionTakenEvent(e PassActionTakenEvent) error {
+	player, err := getEventPlayer(g, e.PlayerId)
+	if err != nil {
+		return err
+	}
+
+	cardIndex, err := getEventCardIndex(g, player, e.DiscardedCardId)
+	if err != nil {
+		return err
+	}
+
+	processEventDiscard(g, player, cardIndex)
+
+	player.RemainingActions--
+
+	g.Events = append(g.Events, e)
+
+	return nil
+
+}
+
 func (g *Game) EndTurn(playerId string) error {
 	if g.Phase != GamePhaseAction {
 		return InvalidPhaseActionErr
