@@ -31,13 +31,16 @@ func NewHandleEventError(gameId string, eventIndex int, reason string) HandleEve
 }
 
 var (
-	InvalidPhaseActionErr    = errors.New("Action taken outside of action phase")
-	OutOfTurnErr             = errors.New("Action taken out of turn")
-	ActionPlayerNotFoundErr  = errors.New("Action player not found")
-	ActionDiscardNotFoundErr = errors.New("Action discard not found")
-	NoRemainingActionsErr    = errors.New("No remaining actions")
-	RemainingActionsErr      = errors.New("Actions still remaining")
-	InsufficientLoanCredit   = errors.New("Insufficient loan credit")
+	InvalidPhaseActionErr     = errors.New("Action taken outside of action phase")
+	OutOfTurnErr              = errors.New("Action taken out of turn")
+	ActionPlayerNotFoundErr   = errors.New("Action player not found")
+	ActionDiscardNotFoundErr  = errors.New("Action discard not found")
+	NoRemainingActionsErr     = errors.New("No remaining actions")
+	RemainingActionsErr       = errors.New("Actions still remaining")
+	InsufficientLoanCreditErr = errors.New("Insufficient loan credit")
+	NoRemainingWildCardsErr   = errors.New("No remaining wild cards")
+	ScoutDiscardAmountErr     = errors.New("Not enough discards to scout")
+	ScoutWildCardErr          = errors.New("Cannot scout with wild card in hand")
 )
 
 type GamePhase string
@@ -148,7 +151,7 @@ func (g *Game) TakeLoanAction(playerId, discardedCardId string) error {
 
 	newIncomeSpace := calculateDeductedIncomeSpace(g.IncomeTrack, player.IncomeSpace, g.LoanIncomeLevelPenalty)
 	if newIncomeSpace < 0 {
-		return InsufficientLoanCredit
+		return InsufficientLoanCreditErr
 	}
 
 	event := LoanActionTakenEvent{
@@ -257,7 +260,91 @@ func (g *Game) handlePassActionTakenEvent(e PassActionTakenEvent) error {
 	g.Events = append(g.Events, e)
 
 	return nil
+}
 
+func (g *Game) TakeScoutAction(playerId string, discardedCardIds []string) error {
+	if g.Phase != GamePhaseAction {
+		return InvalidPhaseActionErr
+	}
+
+	if g.Players[g.PlayerIndex].Id != playerId {
+		return OutOfTurnErr
+	}
+
+	player, err := getEventPlayer(g, playerId)
+	if err != nil {
+		return ActionPlayerNotFoundErr
+	}
+
+	if player.RemainingActions == 0 {
+		return NoRemainingActionsErr
+	}
+
+	if len(discardedCardIds) != 3 {
+		return ScoutDiscardAmountErr
+	}
+
+	if len(g.WildIndustryCards) == 0 || len(g.WildLocationCards) == 0 {
+		return NoRemainingWildCardsErr
+	}
+
+	for _, discardedCardId := range discardedCardIds {
+		if _, err := getEventCardIndex(g, player, discardedCardId); err != nil {
+			return ActionDiscardNotFoundErr
+		}
+	}
+
+	for _, card := range player.Cards {
+		if card.Type == CardTypeWildIndustry || card.Type == CardTypeWildLocation {
+			return ScoutWildCardErr
+		}
+	}
+
+	event := ScoutActionTakenEvent{
+		Type:             ScoutActionTakenEventType,
+		PlayerId:         playerId,
+		DiscardedCardIds: discardedCardIds,
+	}
+
+	if err := g.handleScoutActionTakenEvent(event); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *Game) handleScoutActionTakenEvent(e ScoutActionTakenEvent) error {
+	player, err := getEventPlayer(g, e.PlayerId)
+	if err != nil {
+		return err
+	}
+
+	for _, discardedCardId := range e.DiscardedCardIds {
+		cardIndex, err := getEventCardIndex(g, player, discardedCardId)
+		if err != nil {
+			return err
+		}
+
+		processEventDiscard(g, player, cardIndex)
+	}
+
+	if len(g.WildIndustryCards) == 0 || len(g.WildLocationCards) == 0 {
+		return NewHandleEventError(g.Id, len(g.Events), "No remaining wild cards")
+	}
+
+	player.Cards = append(
+		player.Cards,
+		g.WildIndustryCards[len(g.WildIndustryCards)-1],
+		g.WildLocationCards[len(g.WildLocationCards)-1],
+	)
+	g.WildIndustryCards = g.WildIndustryCards[:len(g.WildIndustryCards)-1]
+	g.WildLocationCards = g.WildLocationCards[:len(g.WildLocationCards)-1]
+
+	player.RemainingActions--
+
+	g.Events = append(g.Events, e)
+
+	return nil
 }
 
 func (g *Game) EndTurn(playerId string) error {
