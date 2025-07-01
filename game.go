@@ -292,11 +292,12 @@ func getEventCardIndex(game *Game, player *Player, cardId string) (int, error) {
 }
 
 func processEventDiscard(game *Game, player *Player, cardIndex int) {
-	if player.Cards[cardIndex].Type == CardTypeWildIndustry {
+	switch player.Cards[cardIndex].Type {
+	case CardTypeIndustry:
 		game.WildIndustryCards = append(game.WildIndustryCards, player.Cards[cardIndex])
-	} else if player.Cards[cardIndex].Type == CardTypeWildLocation {
+	case CardTypeWildLocation:
 		game.WildLocationCards = append(game.WildLocationCards, player.Cards[cardIndex])
-	} else {
+	default:
 		player.Discards = append(player.Discards, player.Cards[cardIndex])
 	}
 
