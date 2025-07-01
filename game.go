@@ -36,6 +36,7 @@ var (
 	ActionPlayerNotFoundErr  = errors.New("Action player not found")
 	ActionDiscardNotFoundErr = errors.New("Action discard not found")
 	NoRemainingActionsErr    = errors.New("No remaining actions")
+	RemainingActionsErr      = errors.New("Actions still remaining")
 )
 
 type GamePhase string
@@ -157,22 +158,6 @@ func (g *Game) TakeLoanAction(playerId, discardedCardId string) error {
 	}
 
 	/** post-action boilerplate */
-
-	if player.RemainingActions == 0 {
-		event := TurnEndedEvent{
-			Type:     TurnEndedEventType,
-			PlayerId: player.Id,
-		}
-
-		if err = g.handleTurnEndedEvent(event); err != nil {
-			return err
-		}
-
-		// TODO: End of round
-
-		// TODO: End of era
-	}
-
 	/** end boilerplate*/
 
 	return nil
@@ -195,7 +180,7 @@ func (g *Game) handleLoanActionTakenEvent(e LoanActionTakenEvent) error {
 		return NewHandleEventError(
 			g.Id,
 			len(g.Events),
-			fmt.Sprintf("Negative income space index"),
+			fmt.Sprintf("Negative income space index: %d", newIncomeSpace),
 		)
 	}
 
@@ -211,6 +196,39 @@ func (g *Game) handleLoanActionTakenEvent(e LoanActionTakenEvent) error {
 	/** end boilerplate */
 
 	g.Events = append(g.Events, e)
+
+	return nil
+}
+
+func (g *Game) EndTurn(playerId string) error {
+	if g.Phase != GamePhaseAction {
+		return InvalidPhaseActionErr
+	}
+
+	if g.Players[g.PlayerIndex].Id != playerId {
+		return OutOfTurnErr
+	}
+
+	player, err := getEventPlayer(g, playerId)
+	if err != nil {
+		return ActionPlayerNotFoundErr
+	}
+
+	if player.RemainingActions != 0 {
+		return RemainingActionsErr
+	}
+
+	event := TurnEndedEvent{
+		Type:     TurnEndedEventType,
+		PlayerId: player.Id,
+	}
+
+	if err = g.handleTurnEndedEvent(event); err != nil {
+		return err
+	}
+
+	// TODO: End of round
+	// TODO: End of era
 
 	return nil
 }
