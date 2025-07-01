@@ -34,7 +34,7 @@ var (
 	InvalidPhaseActionErr    = errors.New("Action taken outside of action phase")
 	OutOfTurnErr             = errors.New("Action taken out of turn")
 	ActionPlayerNotFoundErr  = errors.New("Action player not found")
-	ActionDiscardNotFoundErr = errors.New("Action disdard not found")
+	ActionDiscardNotFoundErr = errors.New("Action discard not found")
 	NoRemainingActionsErr    = errors.New("No remaining actions")
 )
 
