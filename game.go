@@ -37,6 +37,7 @@ var (
 	ActionDiscardNotFoundErr = errors.New("Action discard not found")
 	NoRemainingActionsErr    = errors.New("No remaining actions")
 	RemainingActionsErr      = errors.New("Actions still remaining")
+	InsufficientLoanCredit   = errors.New("Insufficient loan credit")
 )
 
 type GamePhase string
@@ -132,8 +133,6 @@ func (g *Game) TakeLoanAction(playerId, discardedCardId string) error {
 		return OutOfTurnErr
 	}
 
-	// TODO: Handle action sub-phases (choices within each phase)
-
 	player, err := getEventPlayer(g, playerId)
 	if err != nil {
 		return ActionPlayerNotFoundErr
@@ -145,6 +144,11 @@ func (g *Game) TakeLoanAction(playerId, discardedCardId string) error {
 
 	if _, err := getEventCardIndex(g, player, discardedCardId); err != nil {
 		return ActionDiscardNotFoundErr
+	}
+
+	newIncomeSpace := calculateDeductedIncomeSpace(g.IncomeTrack, player.IncomeSpace, g.LoanIncomeLevelPenalty)
+	if newIncomeSpace < 0 {
+		return InsufficientLoanCredit
 	}
 
 	event := LoanActionTakenEvent{
