@@ -15,9 +15,6 @@ var GameSpec = blic.GameSpec{
 	MinPlayerCount: 2,
 	MaxPlayerCount: 4,
 
-	InitialCoalInMarket: 13,
-	InitialIronInMarket: 8,
-
 	LoanAmount:     30,
 	HandSize:       8,
 	LinksPerPlayer: 14,
@@ -36,4 +33,6 @@ var GameSpec = blic.GameSpec{
 	LocationSpecs:           locationSpecs,
 	CanalEraConnectionSpecs: canalEraConnectionSpecs,
 	RailEraConnectionSpecs:  railEraConnectionSpecs,
+	CoalMarketSpec:          coalMarketSpec,
+	IronMarketSpec:          ironMarketSpec,
 }

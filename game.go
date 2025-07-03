@@ -65,8 +65,8 @@ type Game struct {
 	LoanIncomeLevelPenalty int
 	ActionsPerTurn         int
 
-	CoalInMarket int
-	IronInMarket int
+	CoalMarket Market
+	IronMarket Market
 
 	Era Era
 
@@ -95,8 +95,8 @@ func (g *Game) HandleGameCreatedEvent(e GameCreatedEvent) *Game {
 	g.CanalEraConnections = CloneSlice(e.CanalEraConnections)
 	g.RailEraConnections = CloneSlice(e.RailEraConnections)
 
-	g.CoalInMarket = e.InitialCoalInMarket
-	g.IronInMarket = e.InitialIronInMarket
+	g.CoalMarket = e.CoalMarket
+	g.IronMarket = e.IronMarket
 
 	g.Era = EraCanal
 

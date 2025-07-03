@@ -30,8 +30,8 @@ type GameCreatedEvent struct {
 	NumWildLocationCards int
 	NumWildIndustryCards int
 
-	InitialCoalInMarket int
-	InitialIronInMarket int
+	CoalMarket Market
+	IronMarket Market
 
 	ActionsPerTurn int
 

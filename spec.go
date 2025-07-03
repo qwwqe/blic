@@ -19,6 +19,7 @@ var (
 	ErrTooManyMerchantTiles  = errors.New("Too many merchant tiles")
 	ErrIncorrectIndustryType = errors.New("Incorrect industry type")
 	ErrDuplicatePlayerId     = errors.New("Duplicate player id")
+	ErrInvalidMarket         = errors.New("Invalid market")
 )
 
 // TODO: Try generalizing the Spec interface to gracefully accomodate
@@ -34,15 +35,14 @@ type GameSpec struct {
 	MerchantTileSpecs       []MerchantTileSpec
 	PlayerMatSpec           PlayerMatSpec
 	IncomeTrackSpec         IncomeTrackSpec
+	CoalMarketSpec          MarketSpec
+	IronMarketSpec          MarketSpec
 
 	NumWildLocationCards int
 	NumWildIndustryCards int
 
 	MinPlayerCount int
 	MaxPlayerCount int
-
-	InitialCoalInMarket int
-	InitialIronInMarket int
 
 	LoanAmount int
 
@@ -93,6 +93,16 @@ func (s *GameSpec) Build(playerIds []string) (Game, error) {
 
 	incomeTrack := s.IncomeTrackSpec.Build()
 
+	coalMarket, err := s.CoalMarketSpec.Build()
+	if err != nil {
+		return Game{}, err
+	}
+
+	ironMarket, err := s.IronMarketSpec.Build()
+	if err != nil {
+		return Game{}, err
+	}
+
 	game := Game{}
 	game.HandleGameCreatedEvent(GameCreatedEvent{
 		Type: GameCreatedEventType,
@@ -111,8 +121,8 @@ func (s *GameSpec) Build(playerIds []string) (Game, error) {
 		NumWildLocationCards: s.NumWildLocationCards,
 		NumWildIndustryCards: s.NumWildIndustryCards,
 
-		InitialCoalInMarket: s.InitialCoalInMarket,
-		InitialIronInMarket: s.InitialIronInMarket,
+		CoalMarket: *coalMarket,
+		IronMarket: *ironMarket,
 
 		ActionsPerTurn: s.ActionsPerTurn,
 
@@ -528,4 +538,19 @@ func (s IncomeTrackSpec) Build() []int {
 	}
 
 	return track
+}
+
+type MarketSpec struct {
+	NumTiers          int
+	ResourcesPerTier  int
+	StartingResources int
+}
+
+func (s MarketSpec) Build() (*Market, error) {
+	market, err := NewMarket(s.NumTiers, s.StartingResources, s.ResourcesPerTier)
+	if err != nil {
+		return nil, errors.Join(ErrInvalidMarket, err)
+	}
+
+	return market, nil
 }
