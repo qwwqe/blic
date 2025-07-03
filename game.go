@@ -31,18 +31,19 @@ func NewHandleEventError(gameId string, eventIndex int, reason string) HandleEve
 }
 
 var (
-	ErrInvalidPhaseAction     = errors.New("Action taken outside of action phase")
-	ErrOutOfTurn              = errors.New("Action taken out of turn")
-	ErrActionPlayerNotFound   = errors.New("Action player not found")
-	ErrActionDiscardNotFound  = errors.New("Action discard not found")
-	ErrNoRemainingActions     = errors.New("No remaining actions")
-	ErrRemainingActions       = errors.New("Actions still remaining")
-	ErrInsufficientLoanCredit = errors.New("Insufficient loan credit")
-	ErrNoRemainingWildCards   = errors.New("No remaining wild cards")
-	ErrScoutDiscardAmount     = errors.New("Not enough discards to scout")
-	ErrScoutWildCard          = errors.New("Cannot scout with wild card in hand")
-	ErrNoDevelopableIndustry  = errors.New("No industries can be developed")
-	ErrCannotConsumeIron      = errors.New("Cannot consume iron")
+	ErrInvalidPhaseAction        = errors.New("Action taken outside of action phase")
+	ErrOutOfTurn                 = errors.New("Action taken out of turn")
+	ErrActionPlayerNotFound      = errors.New("Action player not found")
+	ErrActionDiscardNotFound     = errors.New("Action discard not found")
+	ErrNoRemainingActions        = errors.New("No remaining actions")
+	ErrRemainingActions          = errors.New("Actions still remaining")
+	ErrInsufficientLoanCredit    = errors.New("Insufficient loan credit")
+	ErrNoRemainingWildCards      = errors.New("No remaining wild cards")
+	ErrScoutDiscardAmount        = errors.New("Not enough discards to scout")
+	ErrScoutWildCard             = errors.New("Cannot scout with wild card in hand")
+	ErrNoDevelopableIndustry     = errors.New("No industries can be developed")
+	ErrCannotConsumeIron         = errors.New("Cannot consume iron")
+	ErrInvalidIndustryTypeAmount = errors.New("Invalid amount of industry types")
 )
 
 type GamePhase string
@@ -50,6 +51,7 @@ type GamePhase string
 const (
 	GamePhaseAction                  GamePhase = "action"
 	GamePhasePickIndustriesToDevelop GamePhase = "pickindustriestodevelop"
+	GamePhaseConsumeIronToDevelop    GamePhase = "consumeirontodevelop"
 )
 
 type Game struct {
@@ -376,7 +378,7 @@ func (g *Game) TakeDevelopAction(playerId, discardedCardId string) error {
 		return ErrNoDevelopableIndustry
 	}
 
-	if !canConsumeIron(g, player) {
+	if !canConsumeIron(g, player, 1) {
 		return ErrCannotConsumeIron
 	}
 
@@ -408,7 +410,69 @@ func (g *Game) handleDevelopActionTakenEvent(e DevelopActionTakenEvent) error {
 
 	g.Phase = GamePhasePickIndustriesToDevelop
 
-	player.RemainingActions--
+	// player.RemainingActions--
+
+	g.Events = append(g.Events, e)
+
+	return nil
+}
+
+func (g *Game) PickIndustriesToDevelop(playerId string, industryTypes []IndustryType) error {
+	if g.Phase != GamePhasePickIndustriesToDevelop {
+		return ErrInvalidPhaseAction
+	}
+
+	if g.Players[g.PlayerIndex].Id != playerId {
+		return ErrOutOfTurn
+	}
+
+	player, err := getEventPlayer(g, playerId)
+	if err != nil {
+		return ErrActionPlayerNotFound
+	}
+
+	if len(industryTypes) < 1 || len(industryTypes) > 2 {
+		return ErrInvalidIndustryTypeAmount
+	}
+
+	if !player.Mat.CanDevelopIndustries(industryTypes) {
+		return ErrNoDevelopableIndustry
+	}
+
+	if !canConsumeIron(g, player, len(industryTypes)) {
+		return ErrCannotConsumeIron
+	}
+
+	event := IndustriesPickedToDevelopEvent{
+		Type:          IndustriesPickedToDevelopEventType,
+		PlayerId:      playerId,
+		IndustryTypes: industryTypes,
+	}
+
+	if err := g.handleIndustriesPickedToDevelopEvent(event); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *Game) handleIndustriesPickedToDevelopEvent(e IndustriesPickedToDevelopEvent) error {
+	player, err := getEventPlayer(g, e.PlayerId)
+	if err != nil {
+		return err
+	}
+
+	for _, industryType := range e.IndustryTypes {
+		if ok := player.Mat.Develop(industryType); !ok {
+			return NewHandleEventError(
+				g.Id,
+				len(g.Events),
+				fmt.Sprintf("Player %s unable to develop industry type \"%s\"", player.Id, industryType),
+			)
+		}
+	}
+
+	g.Phase = GamePhaseConsumeIronToDevelop // 狀態怎麼傳給下一個階段？
 
 	g.Events = append(g.Events, e)
 
@@ -466,16 +530,16 @@ func (g *Game) handleTurnEndedEvent(e TurnEndedEvent) error {
 	return nil
 }
 
-func (g *Game) isIronOnBoard() bool {
+func (g *Game) ConsumableIronOnIndustries() int {
+	resources := 0
 	for _, location := range g.Locations {
 		for _, space := range location.IndustrySpaces {
-			if space.Tile.Type == IndustryTypeIronWorks && space.Resources > 0 {
-				return true
+			if space.Tile.Type == IndustryTypeIronWorks {
+				resources += space.Resources
 			}
 		}
 	}
-
-	return false
+	return resources
 }
 
 func getEventPlayer(g *Game, playerId string) (*Player, error) {
