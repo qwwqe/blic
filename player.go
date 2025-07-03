@@ -45,6 +45,58 @@ func (mat *PlayerMat) HasDevelopableIndustry() bool {
 	return false
 }
 
+func (mat *PlayerMat) CanDevelopIndustries(industryTypes []IndustryType) bool {
+	industryTypeOffset := map[IndustryType]int{}
+
+	for _, industryType := range industryTypes {
+		offset := industryTypeOffset[industryType]
+		industryTiles := mat.IndustryTilesByType(industryType)
+
+		if offset >= len(industryTiles) || !industryTiles[offset].CanDevelop {
+			return false
+		}
+
+		industryTypeOffset[industryType]++
+	}
+
+	return true
+}
+
+func (mat *PlayerMat) Develop(industryType IndustryType) bool {
+	industryTiles := mat.industryTilesByType(industryType)
+
+	if len(*industryTiles) == 0 || !(*industryTiles)[0].CanDevelop {
+		return false
+	}
+
+	*industryTiles = (*industryTiles)[1:]
+
+	return true
+}
+
+func (mat *PlayerMat) industryTilesByType(industryType IndustryType) *[]IndustryTile {
+	switch industryType {
+	case IndustryTypeCoalMine:
+		return &mat.CoalMineTiles
+	case IndustryTypeIronWorks:
+		return &mat.IronWorksTiles
+	case IndustryTypeBrewery:
+		return &mat.BreweryTiles
+	case IndustryTypeManufacturer:
+		return &mat.ManufacturerTiles
+	case IndustryTypeCottonMill:
+		return &mat.CottonMillTiles
+	case IndustryTypePottery:
+		return &mat.PotteryTiles
+	default:
+		return nil
+	}
+}
+
+func (mat *PlayerMat) IndustryTilesByType(industryType IndustryType) []IndustryTile {
+	return *mat.industryTilesByType(industryType)
+}
+
 func (mat PlayerMat) Clone() PlayerMat {
 	mat.CoalMineTiles = CloneSlice(mat.CoalMineTiles)
 	mat.IronWorksTiles = CloneSlice(mat.IronWorksTiles)
