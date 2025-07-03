@@ -1,5 +1,7 @@
 package blic
 
+import "iter"
+
 type PlayerMat struct {
 	CoalMineTiles  []IndustryTile
 	IronWorksTiles []IndustryTile
@@ -8,6 +10,39 @@ type PlayerMat struct {
 	ManufacturerTiles []IndustryTile
 	CottonMillTiles   []IndustryTile
 	PotteryTiles      []IndustryTile
+}
+
+func (mat *PlayerMat) Industries() iter.Seq2[IndustryType, []IndustryTile] {
+	return func(yield func(IndustryType, []IndustryTile) bool) {
+		if !yield(IndustryTypeCoalMine, mat.CoalMineTiles) {
+			return
+		}
+		if !yield(IndustryTypeIronWorks, mat.IronWorksTiles) {
+			return
+		}
+		if !yield(IndustryTypeBrewery, mat.BreweryTiles) {
+			return
+		}
+		if !yield(IndustryTypeManufacturer, mat.ManufacturerTiles) {
+			return
+		}
+		if !yield(IndustryTypeCottonMill, mat.CottonMillTiles) {
+			return
+		}
+		if !yield(IndustryTypePottery, mat.PotteryTiles) {
+			return
+		}
+	}
+}
+
+func (mat *PlayerMat) HasDevelopableIndustry() bool {
+	for _, industryTiles := range mat.Industries() {
+		if len(industryTiles) > 0 && industryTiles[0].CanDevelop {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (mat PlayerMat) Clone() PlayerMat {

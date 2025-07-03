@@ -41,12 +41,15 @@ var (
 	NoRemainingWildCardsErr   = errors.New("No remaining wild cards")
 	ScoutDiscardAmountErr     = errors.New("Not enough discards to scout")
 	ScoutWildCardErr          = errors.New("Cannot scout with wild card in hand")
+	NoDevelopableIndustryErr  = errors.New("No industries can be developed")
+	CannotConsumeIronErr      = errors.New("Cannot consume iron")
 )
 
 type GamePhase string
 
 const (
-	GamePhaseAction GamePhase = "action"
+	GamePhaseAction                  GamePhase = "action"
+	GamePhasePickIndustriesToDevelop GamePhase = "pickindustriestodevelop"
 )
 
 type Game struct {
@@ -347,6 +350,71 @@ func (g *Game) handleScoutActionTakenEvent(e ScoutActionTakenEvent) error {
 	return nil
 }
 
+func (g *Game) TakeDevelopAction(playerId, discardedCardId string) error {
+	if g.Phase != GamePhaseAction {
+		return InvalidPhaseActionErr
+	}
+
+	if g.Players[g.PlayerIndex].Id != playerId {
+		return OutOfTurnErr
+	}
+
+	player, err := getEventPlayer(g, playerId)
+	if err != nil {
+		return ActionPlayerNotFoundErr
+	}
+
+	if player.RemainingActions == 0 {
+		return NoRemainingActionsErr
+	}
+
+	if _, err := getEventCardIndex(g, player, discardedCardId); err != nil {
+		return ActionDiscardNotFoundErr
+	}
+
+	if !player.Mat.HasDevelopableIndustry() {
+		return NoDevelopableIndustryErr
+	}
+
+	if !canConsumeIron(g, player) {
+		return CannotConsumeIronErr
+	}
+
+	event := DevelopActionTakenEvent{
+		Type:            DevelopActionTakenEventType,
+		PlayerId:        playerId,
+		DiscardedCardId: discardedCardId,
+	}
+
+	if err := g.handleDevelopActionTakenEvent(event); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *Game) handleDevelopActionTakenEvent(e DevelopActionTakenEvent) error {
+	player, err := getEventPlayer(g, e.PlayerId)
+	if err != nil {
+		return err
+	}
+
+	cardIndex, err := getEventCardIndex(g, player, e.DiscardedCardId)
+	if err != nil {
+		return err
+	}
+
+	processEventDiscard(g, player, cardIndex)
+
+	g.Phase = GamePhasePickIndustriesToDevelop
+
+	player.RemainingActions--
+
+	g.Events = append(g.Events, e)
+
+	return nil
+}
+
 func (g *Game) EndTurn(playerId string) error {
 	if g.Phase != GamePhaseAction {
 		return InvalidPhaseActionErr
@@ -396,6 +464,18 @@ func (g *Game) handleTurnEndedEvent(e TurnEndedEvent) error {
 	g.Events = append(g.Events, e)
 
 	return nil
+}
+
+func (g *Game) isIronOnBoard() bool {
+	for _, location := range g.Locations {
+		for _, space := range location.IndustrySpaces {
+			if space.Tile.Type == IndustryTypeIronWorks && space.Resources > 0 {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func getEventPlayer(g *Game, playerId string) (*Player, error) {
